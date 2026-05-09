@@ -1,0 +1,135 @@
+[
+  {
+    "name": "Daily Coffee News",
+    "url": "https://dailycoffeenews.com/feed/",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "World Coffee Research",
+    "url": "https://worldcoffeeresearch.org/news",
+    "kind": "page",
+    "enabled": true
+  },
+  {
+    "name": "Specialty Coffee Association",
+    "url": "https://sca.coffee/sca-news?format=rss",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "Coffee Science Foundation",
+    "url": "https://coffeescience.foundation/news-index?format=rss",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "Perfect Daily Grind",
+    "url": "https://perfectdailygrind.com/feed/",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "Sprudge",
+    "url": "https://sprudge.com/feed",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "Global Coffee Report",
+    "url": "https://www.gcrmag.com/feed/",
+    "kind": "feed",
+    "enabled": true
+  },
+  {
+    "name": "International Coffee Organization",
+    "url": "https://ico.org/resources/coffee-market-report-statistics-section/",
+    "kind": "page",
+    "tags": ["market", "origin-organization"],
+    "enabled": true
+  },
+  {
+    "name": "Crossref Coffee Research",
+    "url": "https://api.crossref.org/works?query.bibliographic=coffee%20coffea%20agriculture%20fermentation%20roasting&filter=type:journal-article&sort=published&order=desc&rows=20",
+    "kind": "crossref",
+    "tags": ["academic", "research"],
+    "enabled": true
+  },
+  {
+    "name": "Europe PMC Coffee Research",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=(coffee%20OR%20coffea)%20sort_date:y&format=json&pageSize=20&resultType=core",
+    "kind": "europe_pmc",
+    "tags": ["academic", "research"],
+    "enabled": true
+  },
+  {
+    "name": "Europe PMC Coffee Patents",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=(coffee%20OR%20espresso%20OR%20coffea)%20AND%20SRC:PAT%20sort_date:y&format=json&pageSize=20&resultType=core",
+    "kind": "europe_pmc",
+    "tags": ["patent", "technology"],
+    "enabled": true
+  },
+  {
+    "name": "Cropster News",
+    "url": "https://www.cropster.com/news/",
+    "kind": "page",
+    "tags": ["equipment", "software"],
+    "enabled": true
+  },
+  {
+    "name": "Mahlkonig USA News",
+    "url": "https://www.mahlkoenig.us/blogs/news.atom",
+    "kind": "feed",
+    "tags": ["equipment", "grinder"],
+    "enabled": true
+  },
+  {
+    "name": "La Marzocco Market Center",
+    "url": "https://lamarzocco.com/mktcenter/",
+    "kind": "page",
+    "tags": ["equipment", "espresso-machine"],
+    "enabled": true
+  },
+  {
+    "name": "Marco Beverage Systems News",
+    "url": "https://marcobeveragesystems.com/news/",
+    "kind": "page",
+    "tags": ["equipment", "automation"],
+    "enabled": true
+  },
+  {
+    "name": "ROEST Blog",
+    "url": "https://www.roestcoffee.com/blog",
+    "kind": "page",
+    "tags": ["equipment", "roasting"],
+    "enabled": true
+  },
+  {
+    "name": "Cafes de Colombia News",
+    "url": "https://cafedecolombia.com/particulares/en/communications/news/",
+    "kind": "page",
+    "tags": ["origin-organization", "colombia"],
+    "enabled": true
+  },
+  {
+    "name": "Cecafe Brazil News",
+    "url": "https://www.cecafe.com.br/en/publications/news/",
+    "kind": "page",
+    "tags": ["origin-organization", "brazil"],
+    "enabled": true
+  },
+  {
+    "name": "Anacafe Guatemala News",
+    "url": "https://www.anacafe.org/noticias/",
+    "kind": "page",
+    "tags": ["origin-organization", "guatemala"],
+    "enabled": true
+  },
+  {
+    "name": "Uganda Coffee Development Authority News",
+    "url": "https://ugandacoffee.go.ug/news",
+    "kind": "page",
+    "tags": ["origin-organization", "uganda"],
+    "enabled": true
+  }
+]
