@@ -25,11 +25,13 @@ python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 
 執行收集時，終端機會顯示每個來源的進度條與狀態（OK/FAIL）。
 
-也可以用一鍵腳本：
+完整流程建議直接使用一鍵腳本：
 
 ```bash
-./run_coffee_radar.sh
+./run_daily_sync.sh
 ```
+
+`run_coffee_radar.sh` 僅保留給除錯或單獨重跑資料收集時使用。
 
 ## 同步到 Notion
 
@@ -49,14 +51,14 @@ python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 需要的環境變數：
 
 ```bash
-export OPENAI_API_KEY="你的 OpenAI API key"
-export NOTION_TOKEN="你的 Notion integration token"
+export OPENAI_API_KEY=""
+export NOTION_TOKEN=""
 ```
 
 可選設定：
 
 ```bash
-export OPENAI_MODEL="gpt-5.2"
+export OPENAI_MODEL=""
 ```
 
 Notion 頁面與資料庫 ID 放在 `notion_config.json`。目前已指向：
@@ -65,17 +67,11 @@ Notion 頁面與資料庫 ID 放在 `notion_config.json`。目前已指向：
 - Coffee Radar Articles
 - Coffee Radar Sources
 
-若你要分享給其他人使用，請改用範本檔：
+本專案只保留一份 `notion_config.json`，請直接填入自己的 Notion 資源 ID。
 
-```bash
-cp notion_config.example.json notion_config.json
-```
+## 每週自動執行
 
-然後把 `notion_config.json` 內的三個 ID 改成自己的 Notion 資源 ID。
-
-## 每日自動執行
-
-如果先做本機版，可以用 macOS/Linux 的排程工具每天跑一次 `run_daily_sync.sh`。如果用 Codex 自動化，已可設定每日早上執行。
+可用 macOS/Linux 的排程工具每週跑一次 `run_daily_sync.sh`。如果用 Codex 自動化，已可設定每週固定時間執行。
 
 ## 每週文章
 
