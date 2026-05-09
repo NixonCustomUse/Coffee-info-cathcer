@@ -1,0 +1,5 @@
+{
+  "articles_database_id": "YOUR_NOTION_ARTICLES_DATABASE_ID",
+  "sources_database_id": "YOUR_NOTION_SOURCES_DATABASE_ID",
+  "weekly_parent_page_id": "YOUR_NOTION_WEEKLY_PARENT_PAGE_ID"
+}

@@ -590,11 +590,38 @@ def load_sources(path: Path) -> list[Source]:
     return [Source(**raw) for raw in raw_sources if raw.get("enabled", True)]
 
 
+def truncate_label(value: str, max_length: int = 26) -> str:
+    if len(value) <= max_length:
+        return value
+    return value[: max_length - 1] + "…"
+
+
+def progress_line(
+    index: int,
+    total: int,
+    source_name: str,
+    status: str,
+    kept_items: int,
+    failures: int,
+) -> str:
+    width = 24
+    done = int((index / total) * width)
+    bar = "#" * done + "-" * (width - done)
+    label = truncate_label(source_name)
+    return (
+        f"[{bar}] {index:>2}/{total} | {label:<26} | {status:<4} "
+        f"| kept={kept_items:>3} | fail={failures:>2}"
+    )
+
+
 def collect(sources: list[Source], days: int, minimum_score: int) -> tuple[list[Item], list[str]]:
     items: list[Item] = []
     errors: list[str] = []
+    total_sources = len(sources)
+    is_tty = sys.stderr.isatty()
 
-    for source in sources:
+    for index, source in enumerate(sources, start=1):
+        kept_count = 0
         try:
             if source.kind == "crossref":
                 parsed_items = parse_crossref(source, fetch_json(source.url))
@@ -609,14 +636,20 @@ def collect(sources: list[Source], days: int, minimum_score: int) -> tuple[list[
                 )
         except Exception as exc:  # noqa: BLE001 - keep source failures isolated.
             errors.append(f"{source.name}: {exc}")
-            continue
+            status = "FAIL"
+        else:
+            status = "OK"
+            for item in parsed_items:
+                if not is_relevant_item(source, item):
+                    continue
+                classified = classify(item)
+                if classified.score >= minimum_score and is_recent(classified.published, days):
+                    items.append(classified)
+                    kept_count += 1
 
-        for item in parsed_items:
-            if not is_relevant_item(source, item):
-                continue
-            classified = classify(item)
-            if classified.score >= minimum_score and is_recent(classified.published, days):
-                items.append(classified)
+        line = progress_line(index, total_sources, source.name, status, kept_count, len(errors))
+        end = "\r" if is_tty and index < total_sources else "\n"
+        print(line, end=end, file=sys.stderr, flush=True)
 
     items = dedupe(items)
     return sorted(items, key=sort_key, reverse=True), errors

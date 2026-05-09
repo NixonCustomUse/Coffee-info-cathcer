@@ -23,6 +23,8 @@ python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 - `--limit`: Markdown 報告最多顯示幾筆
 - `--min-score`: 關鍵字門檻，數字越高越嚴格
 
+執行收集時，終端機會顯示每個來源的進度條與狀態（OK/FAIL）。
+
 也可以用一鍵腳本：
 
 ```bash
@@ -62,6 +64,14 @@ Notion 頁面與資料庫 ID 放在 `notion_config.json`。目前已指向：
 - Coffee Radar 主頁
 - Coffee Radar Articles
 - Coffee Radar Sources
+
+若你要分享給其他人使用，請改用範本檔：
+
+```bash
+cp notion_config.example.json notion_config.json
+```
+
+然後把 `notion_config.json` 內的三個 ID 改成自己的 Notion 資源 ID。
 
 ## 每日自動執行
 
