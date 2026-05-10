@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coffee Info Catcher — Industry Signal Intelligence</title>
+<title>Coffee Info Catcher</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,656 +14,495 @@
   --surface-2: #24211d;
   --text: #f5f0eb;
   --text-muted: #9e9488;
+  --text-dim: #6b6358;
   --accent: #d4783c;
   --accent-hover: #e0894f;
-  --accent-dim: rgba(212, 120, 60, 0.15);
+  --accent-dim: rgba(212, 120, 60, 0.12);
   --teal: #2a8c6a;
-  --red: #c0392b;
   --radius: 12px;
+  --radius-sm: 8px;
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body: 'DM Sans', 'Helvetica Neue', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
 }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);background:var(--bg);color:var(--text);
+  line-height:1.5;-webkit-font-smoothing:antialiased;
+  min-height:100dvh;display:flex;flex-direction:column;
+}
+::selection{background:var(--accent-dim);color:var(--text)}
+a{color:var(--accent);text-decoration:none;transition:color .2s}
+button{cursor:pointer;font-family:var(--font-body)}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+/* ── LANDING STATE ── */
+.landing{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:40px 24px;position:relative;overflow:hidden;min-height:100dvh;
 }
+.landing-bg{
+  position:absolute;inset:0;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(212,120,60,0.06) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 30% at 80% 80%, rgba(42,140,106,0.03) 0%, transparent 60%);
+}
+.landing-inner{position:relative;z-index:1;max-width:1080px;margin:0 auto;width:100%;}
+.landing-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:60px;}
+.landing-logo{
+  font-family:var(--font-display);font-size:1.2rem;font-weight:700;
+  letter-spacing:-.01em;color:var(--text);
+}
+.landing-logo em{font-style:italic;color:var(--accent)}
+.landing-source{font-size:.75rem;color:var(--text-dim);font-family:var(--font-mono)}
 
-::selection { background: var(--accent-dim); color: var(--text); }
+.landing-main{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.landing-tag{
+  display:inline-block;font-family:var(--font-mono);font-size:.65rem;font-weight:500;
+  color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px;
+  border:1px solid var(--accent-dim);padding:5px 12px;border-radius:100px;
+}
+.landing h1{
+  font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-bottom:16px;
+}
+.landing h1 span{color:var(--accent)}
+.landing p{
+  font-size:1rem;color:var(--text-muted);line-height:1.7;margin-bottom:32px;max-width:440px;
+}
+.load-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 36px;background:var(--accent);color:var(--bg);border:none;
+  border-radius:100px;font-weight:600;font-size:1rem;transition:all .25s;
+  box-shadow:0 4px 24px rgba(212,120,60,0.25);
+}
+.load-btn:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 6px 32px rgba(212,120,60,0.35);}
+.load-btn.loading{pointer-events:none;opacity:.7;}
+.load-btn .arrow{transition:transform .3s}
+.load-btn.loading .arrow{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
-a:hover { color: var(--accent-hover); }
+.landing-stats{display:flex;gap:32px;margin-top:40px;}
+.landing-stat{text-align:center;}
+.landing-stat-num{font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--text);line-height:1;}
+.landing-stat-label{font-size:.7rem;color:var(--text-dim);margin-top:4px;font-family:var(--font-mono);}
 
-.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-
-/* ── Load animation ── */
-.reveal {
-  opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+/* ── Radar (desktop) ── */
+.radar{position:relative;width:100%;aspect-ratio:1;max-width:400px;margin:0 auto}
+.radar-ring{position:absolute;inset:0;border:1px solid rgba(212,120,60,.1);border-radius:50%}
+.radar-ring:nth-child(1){inset:8%}
+.radar-ring:nth-child(2){inset:22%}
+.radar-ring:nth-child(3){inset:36%}
+.radar-ring:nth-child(4){inset:50%}
+.radar-ring:nth-child(5){inset:64%}
+.radar-sweep{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0%,rgba(212,120,60,.08) 25%,rgba(212,120,60,.15) 50%,transparent 72%);
+  animation:sweep 4s linear infinite;transform-origin:center;
 }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-
-/* ── Nav ── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 20px 0; transition: background 0.3s;
+@keyframes sweep{to{transform:rotate(360deg)}}
+.radar-center{
+  position:absolute;top:50%;left:50%;width:6px;height:6px;
+  background:var(--accent);border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 16px rgba(212,120,60,.4),0 0 48px rgba(212,120,60,.12);
 }
-nav.scrolled { background: rgba(15, 14, 12, 0.92); backdrop-filter: blur(12px); }
-nav .container { display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.logo em { font-style: italic; color: var(--accent); }
-.nav-links { display: flex; gap: 32px; align-items: center; list-style: none; }
-.nav-links a { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; letter-spacing: 0.02em; }
-.nav-links a:hover { color: var(--text); }
-.nav-cta {
-  padding: 8px 20px; border: 1px solid var(--accent); border-radius: 100px;
-  font-size: 0.8rem; color: var(--accent); font-weight: 500; transition: all 0.2s;
+.radar-dot{
+  position:absolute;width:3px;height:3px;background:var(--accent);border-radius:50%;
+  box-shadow:0 0 6px rgba(212,120,60,.5);transition:opacity .4s;
 }
-.nav-cta:hover { background: var(--accent); color: var(--bg); }
-
-/* ── Hero ── */
-.hero {
-  min-height: 100vh; display: flex; align-items: center; position: relative;
-  padding: 120px 0 80px; overflow: hidden;
-}
-.hero-bg {
-  position: absolute; inset: 0; z-index: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212, 120, 60, 0.06) 0%, transparent 70%),
-              radial-gradient(ellipse 50% 40% at 80% 80%, rgba(42, 140, 106, 0.04) 0%, transparent 60%);
-}
-.hero .container { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-.hero-tag {
-  display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
-  color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 24px; border: 1px solid var(--accent-dim); padding: 6px 14px; border-radius: 100px;
-}
-.hero h1 {
-  font-family: var(--font-display); font-size: clamp(2.4rem, 5vw, 3.8rem);
-  font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 20px;
-}
-.hero h1 span { color: var(--accent); }
-.hero p {
-  font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 480px;
-}
-.hero-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 32px; background: var(--accent); color: var(--bg);
-  border-radius: 100px; font-weight: 600; font-size: 0.9rem;
-  transition: all 0.25s; border: none; cursor: pointer;
-}
-.hero-cta:hover { background: var(--accent-hover); color: var(--bg); transform: translateY(-2px); }
-.hero-cta-secondary {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 28px; border: 1px solid var(--surface-2); color: var(--text-muted);
-  border-radius: 100px; font-size: 0.85rem; margin-left: 12px; transition: all 0.2s;
-}
-.hero-cta-secondary:hover { border-color: var(--text-muted); color: var(--text); }
-.hero-trust { display: flex; gap: 24px; margin-top: 40px; align-items: center; flex-wrap: wrap; }
-.hero-trust span { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.06em; font-weight: 500; }
-.hero-trust .logos { display: flex; gap: 20px; align-items: center; }
-.hero-trust .logos svg { height: 20px; opacity: 0.35; }
-
-/* ── Radar Animation ── */
-.radar-visual { position: relative; width: 100%; aspect-ratio: 1; max-width: 480px; margin: 0 auto; }
-.radar-ring { position: absolute; inset: 0; border: 1px solid rgba(212, 120, 60, 0.12); border-radius: 50%; }
-.radar-ring:nth-child(1) { inset: 10%; }
-.radar-ring:nth-child(2) { inset: 25%; }
-.radar-ring:nth-child(3) { inset: 40%; }
-.radar-ring:nth-child(4) { inset: 55%; }
-.radar-ring:nth-child(5) { inset: 70%; }
-
-.radar-sweep {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent 0%, rgba(212, 120, 60, 0.08) 30%, rgba(212, 120, 60, 0.15) 50%, transparent 70%);
-  animation: sweep 4s linear infinite; transform-origin: center;
-}
-@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.radar-center {
-  position: absolute; top: 50%; left: 50%; width: 8px; height: 8px;
-  background: var(--accent); border-radius: 50%; transform: translate(-50%, -50%);
-  box-shadow: 0 0 20px rgba(212, 120, 60, 0.4), 0 0 60px rgba(212, 120, 60, 0.15);
+.radar-dot.active{animation:ping 2s ease-in-out infinite}
+@keyframes ping{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+.radar-label{
+  position:absolute;font-family:var(--font-mono);
+  font-size:.55rem;color:var(--text-dim);letter-spacing:.04em;
+  white-space:nowrap;pointer-events:none;
 }
 
-.radar-dot {
-  position: absolute; width: 4px; height: 4px; background: var(--accent);
-  border-radius: 50%; box-shadow: 0 0 8px rgba(212, 120, 60, 0.5);
-  animation: ping 2s ease-in-out infinite;
+/* ── DASHBOARD STATE ── */
+.dashboard{display:none;padding:24px;flex:1;}
+
+/* ── Top bar ── */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.04);
 }
-@keyframes ping {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.3); }
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-logo{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);
+}
+.topbar-logo em{font-style:italic;color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-sources{font-size:.75rem;color:var(--text-dim);font-family:var(--font-mono)}
+.reset-btn{
+  padding:6px 18px;border:1px solid var(--surface-2);border-radius:100px;
+  background:transparent;color:var(--text-muted);font-size:.75rem;transition:all .2s;
+}
+.reset-btn:hover{border-color:var(--accent-dim);color:var(--text)}
+
+/* ── Dashboard layout ── */
+.dash-grid{display:grid;grid-template-columns:220px 1fr;gap:24px;height:calc(100vh - 100px);}
+.dash-sidebar{overflow-y:auto;padding-right:8px;}
+.dash-main{overflow-y:auto;padding-right:4px;}
+.dash-main::-webkit-scrollbar,.dash-sidebar::-webkit-scrollbar{width:4px;}
+.dash-main::-webkit-scrollbar-track,.dash-sidebar::-webkit-scrollbar-track{background:transparent}
+.dash-main::-webkit-scrollbar-thumb,.dash-sidebar::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:4px}
+
+/* ── Filters ── */
+.filter-group{margin-bottom:24px;}
+.filter-group h4{
+  font-size:.7rem;color:var(--text-dim);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;font-weight:500;
+}
+.filter-tags{display:flex;flex-direction:column;gap:4px;}
+.filter-tag{
+  padding:6px 14px;border-radius:100px;border:1px solid var(--surface-2);
+  background:transparent;color:var(--text-muted);font-size:.78rem;
+  transition:all .2s;text-align:left;display:flex;justify-content:space-between;align-items:center;
+}
+.filter-tag:hover{border-color:var(--accent-dim);color:var(--text);}
+.filter-tag.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.filter-tag .count{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);}
+.filter-tag.active .count{color:var(--accent);}
+
+/* ── Stats bar ── */
+.stats-row{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-chip{
+  padding:6px 14px;background:var(--surface);border-radius:100px;
+  font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);
+  border:1px solid var(--surface-2);
+}
+.stat-chip strong{color:var(--text);font-weight:600;}
+
+/* ── Cards ── */
+.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card{
+  background:var(--surface);border-radius:var(--radius);padding:18px 20px;
+  border:1px solid rgba(255,255,255,.03);transition:all .25s;cursor:pointer;
+}
+.card:hover{border-color:var(--accent-dim);transform:translateY(-2px);}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;}
+.card-score{
+  font-family:var(--font-mono);font-size:.6rem;font-weight:500;color:var(--bg);
+  background:var(--accent);width:22px;height:22px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;
+}
+.card-title{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.4;}
+.card-meta{font-size:.72rem;color:var(--text-dim);margin-bottom:8px;display:flex;gap:12px;}
+.card-source{color:var(--accent);}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;}
+.card-tag{
+  font-size:.65rem;padding:2px 10px;border-radius:100px;
+  background:var(--surface-2);color:var(--text-muted);border:none;
+}
+.card-summary{font-size:.8rem;color:var(--text-muted);line-height:1.6;}
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-dim);
 }
 
-.radar-label {
-  position: absolute; font-family: var(--font-mono); font-size: 0.6rem;
-  color: var(--text-muted); letter-spacing: 0.04em;
-  white-space: nowrap; opacity: 0.6;
+/* ── MOBILE LAYOUT ── */
+.mobile-dash{display:none;padding:16px;}
+.mobile-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;
 }
-.radar-stat {
-  position: absolute; font-family: var(--font-display); font-size: 2rem; font-weight: 700;
-  color: var(--text); line-height: 1;
+.mobile-header .logo{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
 }
-.radar-stat-label { font-family: var(--font-body); font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+.mobile-header .logo em{font-style:italic;color:var(--accent)}
+.mobile-filter-scroll{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;margin-bottom:12px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.mobile-filter-scroll::-webkit-scrollbar{display:none}
+.mobile-filter-scroll .filter-tag{white-space:nowrap;font-size:.72rem;padding:5px 12px;}
+.mobile-cards{display:flex;flex-direction:column;gap:10px;padding-bottom:80px;}
+.mobile-cards .card{padding:14px 16px;}
+.mobile-cards .card-title{font-size:.82rem;}
+.mobile-cards .card-summary{font-size:.75rem;}
+.mobile-bottom{
+  position:fixed;bottom:0;left:0;right:0;padding:12px 16px 20px;
+  background:var(--bg);border-top:1px solid var(--surface-2);
+  display:flex;justify-content:space-between;align-items:center;z-index:10;
+}
+.mobile-bottom .stat-chip{font-size:.65rem;padding:4px 12px;}
 
-/* ── Signal Ticker ── */
-.signal-ticker {
-  margin-top: 20px; overflow: hidden; height: 28px; position: relative;
+@media(max-width:900px){
+  .landing-main{grid-template-columns:1fr;gap:32px;}
+  .landing-stats{gap:20px;}
+  .landing-stat-num{font-size:1.2rem;}
+
+  .desktop-only{display:none!important}
+  .dashboard{padding:0;}
+  .dash-grid{display:none;}
+  .mobile-dash{display:block;}
 }
-.signal-ticker-track {
-  display: flex; flex-direction: column; animation: tick 12s infinite;
-}
-.signal-ticker-item {
-  height: 28px; display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--text-muted);
-}
-.signal-ticker-item .badge {
-  font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 8px;
-  background: var(--accent-dim); color: var(--accent); border-radius: 4px; white-space: nowrap;
-}
-@keyframes tick {
-  0%, 22% { transform: translateY(0); }
-  25%, 47% { transform: translateY(-28px); }
-  50%, 72% { transform: translateY(-56px); }
-  75%, 97% { transform: translateY(-84px); }
-  100% { transform: translateY(0); }
+@media(min-width:901px){
+  .mobile-only{display:none!important}
 }
 
-/* ── Section styles ── */
-.section { padding: 100px 0; }
-.section-label {
-  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
-  color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
-}
-.section-title {
-  font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; margin-bottom: 16px;
-}
-.section-sub { color: var(--text-muted); font-size: 1rem; max-width: 600px; line-height: 1.7; }
-
-/* ── Problem/Solution ── */
-.problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 60px; align-items: center; }
-.problem-visual {
-  background: var(--surface); border-radius: var(--radius); padding: 40px;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.problem-visual .chaos { display: flex; flex-wrap: wrap; gap: 8px; }
-.problem-visual .chaos span {
-  font-size: 0.7rem; padding: 6px 14px; background: var(--surface-2); border-radius: 6px;
-  color: var(--text-muted); animation: float 3s ease-in-out infinite;
-}
-.problem-visual .chaos span:nth-child(3n) { animation-delay: 0.5s; }
-.problem-visual .chaos span:nth-child(4n) { animation-delay: 1s; }
-.problem-visual .chaos span:nth-child(5n) { animation-delay: 1.5s; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-
-.solution-list { display: flex; flex-direction: column; gap: 24px; }
-.solution-item { display: flex; gap: 16px; }
-.solution-item .icon { font-size: 1.2rem; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
-.solution-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
-.solution-item p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
-
-/* ── How It Works ── */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
-.step {
-  background: var(--surface); border-radius: var(--radius); padding: 36px 28px;
-  border: 1px solid rgba(255,255,255,0.04); transition: all 0.3s; position: relative;
-}
-.step:hover { border-color: var(--accent-dim); transform: translateY(-4px); }
-.step-number {
-  font-family: var(--font-display); font-size: 2.8rem; font-weight: 700;
-  color: var(--accent-dim); line-height: 1; margin-bottom: 16px;
-}
-.step h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
-.step p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
-
-/* ── Social Proof ── */
-.testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 60px; }
-.testimonial {
-  background: var(--surface); border-radius: var(--radius); padding: 32px 28px;
-  border: 1px solid rgba(255,255,255,0.04); transition: all 0.3s;
-}
-.testimonial:hover { border-color: var(--accent-dim); }
-.testimonial-stars { color: var(--accent); font-size: 0.8rem; margin-bottom: 16px; letter-spacing: 2px; }
-.testimonial blockquote { font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
-.testimonial footer { display: flex; align-items: center; gap: 12px; }
-.testimonial .avatar {
-  width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 0.85rem; color: var(--accent); font-weight: 600;
-}
-.testimonial .name { font-size: 0.8rem; font-weight: 600; }
-.testimonial .role { font-size: 0.7rem; color: var(--text-muted); }
-
-.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 60px; }
-.metric {
-  text-align: center; padding: 32px 16px; background: var(--surface);
-  border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.04);
-}
-.metric-num { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; color: var(--accent); line-height: 1; }
-.metric-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; }
-
-/* ── Technical Differentiators ── */
-.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 60px; }
-.feature {
-  background: var(--surface); border-radius: var(--radius); padding: 32px 28px;
-  border: 1px solid rgba(255,255,255,0.04); transition: all 0.3s;
-}
-.feature:hover { border-color: var(--accent-dim); background: var(--surface-2); }
-.feature-icon { font-size: 1.4rem; margin-bottom: 16px; display: block; }
-.feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
-.feature p { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
-
-/* ── CTA Section ── */
-.cta-section {
-  background: var(--surface); border-radius: 24px; padding: 80px; text-align: center;
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.cta-section .section-title { max-width: 700px; margin: 0 auto 16px; }
-.cta-section .section-sub { margin: 0 auto 40px; }
-.cta-form { display: flex; gap: 12px; max-width: 480px; margin: 0 auto; }
-.cta-form input {
-  flex: 1; padding: 14px 20px; border-radius: 100px; border: 1px solid var(--surface-2);
-  background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 0.9rem; outline: none;
-  transition: border-color 0.2s;
-}
-.cta-form input:focus { border-color: var(--accent); }
-.cta-form input::placeholder { color: var(--text-muted); }
-.cta-form button {
-  padding: 14px 32px; background: var(--accent); color: var(--bg); border: none;
-  border-radius: 100px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
-  transition: all 0.25s; white-space: nowrap;
-}
-.cta-form button:hover { background: var(--accent-hover); transform: translateY(-2px); }
-.cta-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 16px; }
-.cta-alt { margin-top: 24px; }
-.cta-alt a { font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid var(--surface-2); padding-bottom: 2px; }
-.cta-alt a:hover { color: var(--text); border-color: var(--text-muted); }
-
-/* ── Footer ── */
-footer { padding: 60px 0 40px; border-top: 1px solid rgba(255,255,255,0.04); margin-top: 60px; }
-footer .container { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
-footer h4 { font-size: 0.8rem; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
-footer ul { list-style: none; }
-footer li { margin-bottom: 10px; }
-footer a { font-size: 0.85rem; color: var(--text-muted); }
-footer a:hover { color: var(--text); }
-footer p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.7; max-width: 320px; }
-.footer-newsletter { display: flex; gap: 8px; margin-top: 16px; }
-.footer-newsletter input {
-  flex: 1; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--surface-2);
-  background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 0.8rem; outline: none;
-}
-.footer-newsletter input:focus { border-color: var(--accent); }
-.footer-newsletter button {
-  padding: 10px 18px; background: var(--accent); color: var(--bg); border: none;
-  border-radius: 8px; font-size: 0.8rem; cursor: pointer; font-weight: 500;
-}
-.footer-bottom { grid-column: 1 / -1; padding-top: 32px; margin-top: 32px; border-top: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; }
-.footer-bottom span { font-size: 0.75rem; color: var(--text-muted); }
-
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .hero .container { grid-template-columns: 1fr; gap: 40px; }
-  .radar-visual { max-width: 340px; }
-  .problem-grid { grid-template-columns: 1fr; gap: 40px; }
-  .steps { grid-template-columns: 1fr; }
-  .testimonials { grid-template-columns: 1fr; }
-  .metrics { grid-template-columns: repeat(2, 1fr); }
-  .features { grid-template-columns: 1fr; }
-  .cta-section { padding: 40px 24px; }
-  .cta-form { flex-direction: column; }
-  footer .container { grid-template-columns: 1fr 1fr; }
-  .nav-links { display: none; }
-}
-@media (max-width: 600px) {
-  .hero h1 { font-size: 2rem; }
-  .metrics { grid-template-columns: 1fr 1fr; }
-  footer .container { grid-template-columns: 1fr; }
+@media(max-width:600px){
+  .landing{padding:24px 16px;}
+  .landing-header{margin-bottom:32px;}
+  .landing h1{font-size:1.6rem;}
+  .landing p{font-size:.88rem;}
+  .landing-stats{gap:16px;flex-wrap:wrap;}
+  .load-btn{width:100%;justify-content:center;}
 }
 </style>
 </head>
 <body>
 
-<nav id="nav">
-  <div class="container">
-    <div class="logo">Coffee<em> Info</em> Catcher</div>
-    <ul class="nav-links">
-      <li><a href="#how">How It Works</a></li>
-      <li><a href="#features">Features</a></li>
-      <li><a href="#testimonials">Testimonials</a></li>
-      <li><a href="#cta" class="nav-cta">Get Early Access</a></li>
-    </ul>
-  </div>
-</nav>
-
-<section class="hero" id="hero">
-  <div class="hero-bg"></div>
-  <div class="container">
-    <div>
-      <div class="hero-tag reveal visible">Now in Beta</div>
-      <h1 class="reveal visible reveal-delay-1">
-        The coffee industry moves fast.<br>
-        <span>Catch every signal.</span>
-      </h1>
-      <p class="reveal visible reveal-delay-2">
-        Coffee Info Catcher monitors 20+ sources across the global coffee industry — 
-        from farm to cup — and delivers clean, categorized intelligence to your team.
-      </p>
-      <div class="reveal visible reveal-delay-3">
-        <a href="#cta" class="hero-cta">Start Monitoring →</a>
-        <a href="#how" class="hero-cta-secondary">See How It Works</a>
-      </div>
-      <div class="hero-trust reveal visible reveal-delay-4">
-        <span>Trusted by</span>
-        <div class="logos">
-          <svg viewBox="0 0 100 24" fill="none"><text x="0" y="18" font-size="14" font-weight="600" fill="currentColor">World Coffee Research</text></svg>
-          <svg viewBox="0 0 80 24" fill="none"><text x="0" y="18" font-size="14" font-weight="600" fill="currentColor">SCA</text></svg>
-          <svg viewBox="0 0 90 24" fill="none"><text x="0" y="18" font-size="14" font-weight="600" fill="currentColor">Daily Coffee News</text></svg>
+<!-- ── LANDING ── -->
+<div class="landing" id="landing">
+  <div class="landing-bg"></div>
+  <div class="landing-inner">
+    <div class="landing-header">
+      <div class="landing-logo">Coffee<em> Info</em> Catcher</div>
+      <div class="landing-source">20 sources · 6 categories</div>
+    </div>
+    <div class="landing-main">
+      <div>
+        <div class="landing-tag">Live · Beta</div>
+        <h1>The coffee industry moves fast.<br><span>Catch every signal.</span></h1>
+        <p>111 signals collected today from 20 sources — filtered, categorized, ranked. No signup, no email, just the week's coffee intelligence.</p>
+        <button class="load-btn" id="loadBtn" onclick="loadDashboard()">
+          <span>Load Weekly Signals</span>
+          <span class="arrow">→</span>
+        </button>
+        <div class="landing-stats">
+          <div class="landing-stat"><div class="landing-stat-num">20+</div><div class="landing-stat-label">sources</div></div>
+          <div class="landing-stat"><div class="landing-stat-num">6</div><div class="landing-stat-label">categories</div></div>
+          <div class="landing-stat"><div class="landing-stat-num">111</div><div class="landing-stat-label">signals</div></div>
         </div>
       </div>
-    </div>
-
-    <div class="reveal visible reveal-delay-2">
-      <div class="radar-visual">
-        <div class="radar-ring"></div>
-        <div class="radar-ring"></div>
-        <div class="radar-ring"></div>
-        <div class="radar-ring"></div>
-        <div class="radar-ring"></div>
+      <div class="radar desktop-only" id="heroRadar">
+        <div class="radar-ring"></div><div class="radar-ring"></div><div class="radar-ring"></div>
+        <div class="radar-ring"></div><div class="radar-ring"></div>
         <div class="radar-sweep"></div>
         <div class="radar-center"></div>
-        <div class="radar-dot" style="top:22%;left:68%"></div>
-        <div class="radar-dot" style="top:45%;left:80%;animation-delay:0.6s"></div>
-        <div class="radar-dot" style="top:65%;left:30%;animation-delay:1.2s"></div>
-        <div class="radar-dot" style="top:30%;left:20%;animation-delay:0.3s"></div>
-        <div class="radar-dot" style="top:72%;left:65%;animation-delay:0.9s"></div>
-        <div class="radar-dot" style="top:15%;left:50%;animation-delay:1.5s"></div>
-        <div class="radar-dot" style="top:55%;left:15%;animation-delay:0.7s"></div>
-        <div class="radar-stat" style="top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6rem;">111</div>
-        <div class="radar-stat-label" style="position:absolute;top:calc(50% + 16px);left:50%;transform:translateX(-50%);font-size:0.65rem;">signals today</div>
-        <div class="radar-label" style="top:5%;right:5%">DCN</div>
-        <div class="radar-label" style="top:40%;left:-12px">WCR</div>
-        <div class="radar-label" style="bottom:10%;right:0">ICO</div>
-        <div class="radar-label" style="top:20%;left:20%">PDG</div>
-      </div>
-
-      <div class="signal-ticker">
-        <div class="signal-ticker-track">
-          <div class="signal-ticker-item"><span class="badge">farm</span>Homegrown coffee is fuelling Thailand's specialty boom</div>
-          <div class="signal-ticker-item"><span class="badge">tech</span>New smart grinder tech redefines espresso consistency</div>
-          <div class="signal-ticker-item"><span class="badge">market</span>ICO reports 12% increase in global coffee demand</div>
-          <div class="signal-ticker-item"><span class="badge">climate</span>Kenyan study maps nutrient strategies for coffee farms</div>
-        </div>
+        <div id="radarDots"></div>
+        <div class="radar-label" style="top:3%;left:55%">Daily Coffee News</div>
+        <div class="radar-label" style="top:35%;left:-8px">World Coffee Research</div>
+        <div class="radar-label" style="bottom:15%;right:0">Int'l Coffee Org</div>
+        <div class="radar-label" style="top:18%;left:22%">Perfect Daily Grind</div>
+        <div class="radar-label" style="bottom:45%;left:-10px">Europe PMC</div>
+        <div class="radar-label" style="top:50%;right:-6px">Global Coffee Report</div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<section class="section" id="how">
-  <div class="container">
-    <div class="reveal"><span class="section-label">The Problem</span></div>
-    <div class="problem-grid">
-      <div class="reveal reveal-delay-1">
-        <h2 class="section-title">Coffee moves fast. <br>Your reading list shouldn't.</h2>
-        <p class="section-sub">
-          Between Daily Coffee News, World Coffee Research, ICO reports, European patents, 
-          and a dozen trade publications — staying on top of the industry is a full-time job. 
-          Most teams miss critical signals because there's simply too much noise.
-        </p>
-      </div>
-      <div class="reveal reveal-delay-2 problem-visual">
-        <div class="chaos">
-          <span>Daily Coffee News</span>
-          <span>ICO Report Q3</span>
-          <span>SCA News</span>
-          <span>Patent US2024/012345</span>
-          <span>Sprudge</span>
-          <span>PDG Feature</span>
-          <span>WCR Blog</span>
-          <span>Europe PMC</span>
-          <span>Global Coffee Report</span>
-          <span>Roast Magazine</span>
-          <span>Coffee Science Foundation</span>
-          <span>Cropster Blog</span>
-        </div>
-        <p style="color:var(--text-muted);font-size:0.8rem;margin-top:16px;text-align:center;">
-          111 signals collected today from 20 sources — filtered, categorized, ranked.
-        </p>
-      </div>
+<!-- ── DASHBOARD ── -->
+<div class="dashboard" id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo desktop-only">Coffee<em> Info</em> Catcher</div>
+      <div class="topbar-sources"><span id="totalCount">0</span> signals · <span id="sourceCount">0</span> sources</div>
+    </div>
+    <div class="topbar-right">
+      <button class="reset-btn" onclick="resetView()">← Back</button>
     </div>
   </div>
-</section>
 
-<section class="section" style="padding-top:0;">
-  <div class="container">
-    <div class="reveal"><span class="section-label">How It Works</span></div>
-    <h2 class="section-title reveal reveal-delay-1">From raw feed to <br>intelligence in seconds.</h2>
-    <div class="steps">
-      <div class="step reveal reveal-delay-1">
-        <div class="step-number">01</div>
-        <h3>Collect</h3>
-        <p>Pulls from 20+ sources — RSS feeds, research databases, patent offices, and trade publications — every time you run it.</p>
-      </div>
-      <div class="step reveal reveal-delay-2">
-        <div class="step-number">02</div>
-        <h3>Classify</h3>
-        <p>120+ keywords across 6 categories (farm, climate, processing, roasting, equipment, market). Every item scored by relevance.</p>
-      </div>
-      <div class="step reveal reveal-delay-3">
-        <div class="step-number">03</div>
-        <h3>Deliver</h3>
-        <p>Clean JSONL data, Markdown reports, Notion sync, and HTML dashboards. Your team gets the signal, not the noise.</p>
-      </div>
+  <!-- DESKTOP DASH -->
+  <div class="dash-grid desktop-only" id="dashDesktop">
+    <div class="dash-sidebar" id="sidebar"></div>
+    <div class="dash-main">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="cards-grid" id="cardsGrid"></div>
     </div>
   </div>
-</section>
 
-<section class="section" id="features">
-  <div class="container">
-    <div class="reveal"><span class="section-label">Technical Details</span></div>
-    <h2 class="section-title reveal reveal-delay-1">Built for teams who <br>need to know first.</h2>
-    <div class="features">
-      <div class="feature reveal reveal-delay-1">
-        <span class="feature-icon">🗂️</span>
-        <h3>6 Category Classifier</h3>
-        <p>Farm/Origin, Growing/Climate, Processing, Roasting/Brewing, Equipment/Automation, Market/Price — with 120+ keyword rules.</p>
-      </div>
-      <div class="feature reveal reveal-delay-1">
-        <span class="feature-icon">🔗</span>
-        <h3>Notion Integration</h3>
-        <p>Syncs directly to your Notion database with deduplication. Weekly reports auto-published to your Coffee Radar workspace.</p>
-      </div>
-      <div class="feature reveal reveal-delay-2">
-        <span class="feature-icon">🧠</span>
-        <h3>AI Summaries</h3>
-        <p>Optional OpenRouter-powered Chinese summaries. Works with free models or your own API key. Falls back to deterministic rules.</p>
-      </div>
-      <div class="feature reveal reveal-delay-2">
-        <span class="feature-icon">📊</span>
-        <h3>Smart Scoring</h3>
-        <p>Every item scored by keyword density and category breadth. Surface the most relevant signals first, every time.</p>
-      </div>
-      <div class="feature reveal reveal-delay-3">
-        <span class="feature-icon">🔬</span>
-        <h3>Research Sources</h3>
-        <p>Crossref API + Europe PMC integration. Filters out unrelated research using exclusion terms — coffee-specific results only.</p>
-      </div>
-      <div class="feature reveal reveal-delay-3">
-        <span class="feature-icon">📋</span>
-        <h3>Segment Reports</h3>
-        <p>Auto-generated farm, processing, climate-tech, and equipment reports. Your whole team gets the slice they care about.</p>
-      </div>
+  <!-- MOBILE DASH -->
+  <div class="mobile-dash mobile-only" id="dashMobile">
+    <div class="mobile-header">
+      <div class="logo">Coffee<em> Info</em> Catcher</div>
+      <div class="topbar-sources"><span id="mobileTotal">0</span> signals</div>
+    </div>
+    <div class="mobile-filter-scroll" id="mobileFilters"></div>
+    <div class="mobile-cards" id="mobileCards"></div>
+    <div class="mobile-bottom">
+      <span class="stat-chip"><strong id="mobileSourceCount">0</strong> sources</span>
+      <button class="reset-btn" onclick="resetView()">← Back</button>
     </div>
   </div>
-</section>
-
-<section class="section" id="testimonials">
-  <div class="container">
-    <div class="reveal"><span class="section-label">Trusted by Industry Leaders</span></div>
-    <h2 class="section-title reveal reveal-delay-1">From roasters to researchers.</h2>
-    <div class="testimonials">
-      <div class="testimonial reveal reveal-delay-1">
-        <div class="testimonial-stars">★★★★★</div>
-        <blockquote>"We were manually tracking 8 different news sources. Coffee Info Catcher cut that to zero. The category classifier is uncannily accurate."</blockquote>
-        <footer>
-          <div class="avatar">SK</div>
-          <div><div class="name">Sarah Kim</div><div class="role">Head of Coffee, Counter Culture</div></div>
-        </footer>
-      </div>
-      <div class="testimonial reveal reveal-delay-2">
-        <div class="testimonial-stars">★★★★★</div>
-        <blockquote>"The Notion sync alone saves us hours every week. Now our entire sourcing team sees the same signals without endless Slack threads."</blockquote>
-        <footer>
-          <div class="avatar">JM</div>
-          <div><div class="name">James Moreno</div><div class="role">Green Buyer, Intelligentsia</div></div>
-        </footer>
-      </div>
-      <div class="testimonial reveal reveal-delay-3">
-        <div class="testimonial-stars">★★★★★</div>
-        <blockquote>"As a researcher, I need to know about new coffee science publications immediately. This catches papers I'd miss for months."</blockquote>
-        <footer>
-          <div class="avatar">DL</div>
-          <div><div class="name">Dr. Lucia Vargas</div><div class="role">Coffee Science Foundation</div></div>
-        </footer>
-      </div>
-    </div>
-
-    <div class="metrics reveal">
-      <div class="metric reveal reveal-delay-1">
-        <div class="metric-num">20+</div>
-        <div class="metric-label">Sources Monitored</div>
-      </div>
-      <div class="metric reveal reveal-delay-2">
-        <div class="metric-num">111</div>
-        <div class="metric-label">Daily Signals Avg</div>
-      </div>
-      <div class="metric reveal reveal-delay-3">
-        <div class="metric-num">120+</div>
-        <div class="metric-label">Keyword Rules</div>
-      </div>
-      <div class="metric reveal reveal-delay-4">
-        <div class="metric-num">6</div>
-        <div class="metric-label">Categories</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="cta">
-  <div class="container">
-    <div class="cta-section reveal">
-      <span class="section-label">Get Early Access</span>
-      <h2 class="section-title">Ready to catch every signal?</h2>
-      <p class="section-sub">Join 50+ coffee professionals already using Coffee Info Catcher. Free during beta.</p>
-      <form class="cta-form" onsubmit="event.preventDefault();this.querySelector('button').textContent='You\'re in! ✓';">
-        <input type="email" placeholder="Work email" required>
-        <button type="submit">Get Access →</button>
-      </form>
-      <p class="cta-note">No credit card required. 5-minute setup.</p>
-      <div class="cta-alt">
-        <a href="https://github.com/NixonCustomUse/Coffee-info-cathcer">Prefer to self-host? Grab the code on GitHub →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div>
-      <div class="logo" style="margin-bottom:12px;">Coffee<em> Info</em> Catcher</div>
-      <p>Industry signal intelligence for coffee professionals. Know what matters before your competitors do.</p>
-      <div class="footer-newsletter">
-        <input type="email" placeholder="Get weekly signals">
-        <button>→</button>
-      </div>
-    </div>
-    <div>
-      <h4>Product</h4>
-      <ul>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#how">How It Works</a></li>
-        <li><a href="https://github.com/NixonCustomUse/Coffee-info-cathcer">GitHub</a></li>
-        <li><a href="#">Changelog</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Resources</h4>
-      <ul>
-        <li><a href="#">Documentation</a></li>
-        <li><a href="#">API Reference</a></li>
-        <li><a href="#">Source Config</a></li>
-        <li><a href="#">Status</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
-        <li><a href="#">Privacy</a></li>
-      </ul>
-    </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 Coffee Info Catcher</span>
-      <span>Built for the coffee industry</span>
-    </div>
-  </div>
-</footer>
+</div>
 
 <script>
-// ── Scroll-triggered reveals ──
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+const DATA = [{"t": "The Future of Espresso Grinding: How Smart Tech Is Redefining Consistency", "s": "Mahlkonig USA News", "u": "https://www.mahlkoenig.us/blogs/news/the-future-of-espresso-grinding", "p": "2026-03-06", "c": ["種植/氣候", "烘焙/萃取技術", "設備/自動化"], "m": ["automation", "brewing", "data", "espresso"], "sc": 14, "su": "Your early morning espresso dial-in doesn't survive the mid-morning rush. Humidity rises, burrs heat up, and before you realize it, the balanced shot from 8 AM pulls sour by 10 AM. A 50-micron shift i"}, {"t": "Discover the Future of Coffee at Hotelex Shanghai", "s": "Mahlkonig USA News", "u": "https://www.mahlkoenig.us/blogs/news/discover-the-future-of-coffee-at-hotelex-shanghai", "p": "2026-03-17", "c": ["烘焙/萃取技術", "設備/自動化", "市場/價格"], "m": ["brewing", "cupping", "data", "espresso"], "sc": 13, "su": "Join us at Hotelex Shanghai and discover the latest innovations from the Hemro Group brands. From hands-on experiences to immersive demos, our booth will be the place to explore what’s next in coffee "}, {"t": "Microns & Grind Consistency: The Science Behind Better Coffee", "s": "Mahlkonig USA News", "u": "https://www.mahlkoenig.us/blogs/news/microns-grind-consistency", "p": "2026-04-06", "c": ["農場/產地", "烘焙/萃取技術", "設備/自動化"], "m": ["brew", "espresso", "extraction", "origin"], "sc": 12, "su": "The difference between a perfectly smooth shot of espresso and a sharp and bitter one often comes down to something invisible to the naked eye: microns . These microscopic measurements of coffee parti"}, {"t": "Dale Harris Welcomed as New Brand Ambassador", "s": "Mahlkonig USA News", "u": "https://www.mahlkoenig.us/blogs/news/dale-harris-welcomed-as-new-brand-ambassador", "p": "2026-03-24", "c": ["種植/氣候", "處理法/後製", "烘焙/萃取技術", "市場/價格"], "m": ["grinder", "international trade", "natural", "sustainability"], "sc": 12, "su": "Dale is a highly respected coffee expert and the World Barista Champion of 2017. Over the years, he has built a reputation for his dedication to coffee sustainability, barista training, and education "}, {"t": "Homegrown coffee is fuelling Thailand’s specialty boom", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/04/thailand-specialty-coffee-boom/", "p": "Wed, 29 Ap", "c": ["農場/產地", "市場/價格"], "m": ["arabica", "demand", "producer", "robusta"], "sc": 9, "su": "Key takeaways Thailand currently ranks as the world’s 20th-largest coffee producer, down from the top 15 a decade ago. The country grows mainly robusta, though arabica production is growing, highlight"}, {"t": "Meet Us At World of Coffee in San Diego", "s": "Mahlkonig USA News", "u": "https://www.mahlkoenig.us/blogs/news/meet-us-at-world-of-coffee-in-san-diego", "p": "2026-03-27", "c": ["烘焙/萃取技術", "設備/自動化"], "m": ["brewing", "espresso", "grinder", "platform"], "sc": 9, "su": "We’re excited to invite you to join us at World of Coffee San Diego , where innovation, performance, and hands-on experiences come together. Visit the Hemro Group booth #2005 and be among the first to"}, {"t": "Neumann Kaffee Gruppe’s nutrient strategies – a Kenyan case study", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/neumann-kaffee-gruppes-nutrient-strategies/", "p": "Thu, 07 Ma", "c": ["農場/產地", "種植/氣候"], "m": ["farmers", "harvest", "smallholder", "soil"], "sc": 8, "su": "Kenyan coffee production has experienced a “modest rebound” in the latest harvest season. Image: Alice Oldenburg, NKG & JDE Peet’s. As pressures mount on Kenyan coffee, integrated nutrient management "}, {"t": "The War in Iran is Making Coffee Production More Expensive", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/05/the-war-in-iran-is-making-coffee-production-more-expensive/", "p": "Tue, 05 Ma", "c": ["農場/產地", "市場/價格"], "m": ["farmers", "producers", "smallholder", "supply"], "sc": 8, "su": "Fertilizer costs are skyrocketing for coffee producers, threatening future global supply and the livelihoods of smallholder farmers as the U.S-Iran war sends shocks through the energy, shipping and ag"}, {"t": "The Roasting Procedure and Its Characteristics Using Solid-State NMR: Case Study of Bengkulu Robusta Coffee", "s": "Europe PMC Coffee Research", "u": "https://doi.org/10.21203/rs.3.rs-9573552/v1", "p": "2026-05-04", "c": ["農場/產地", "烘焙/萃取技術"], "m": ["arabica", "producers", "roasting", "robusta"], "sc": 8, "su": "Abstract Solid-state Nuclear Magnetic Resonance (SS NMR) spectroscopy revealed considerable chemical changes in Bengkulu Robusta coffee roasting. The 1 H MAS NMR spectra showed increased caffeine peak"}, {"t": "Coffee, Carbon and Biodiversity: Rethinking Sustainability Initiatives for Shared Value | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-business-carbon-and-biodiversity", "p": "Wed, 29 Ap", "c": ["農場/產地", "種植/氣候"], "m": ["agroforestry", "climate", "producers", "sustainability"], "sc": 8, "su": "Emily Pappo, Ph.D., a Postdoctoral Fellow with Smithsonian Bird Friendly Coffee & Cocoa, draws on a global meta-analysis to argue that while tree planting dominates current climate strategies in coffe"}, {"t": "Beyond Arabica and Robusta: Research to Redefine Liberica and Excelsa Coffee | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-insight-liberica-excelsa", "p": "Wed, 29 Ap", "c": ["農場/產地", "種植/氣候"], "m": ["arabica", "climate", "resilience", "robusta"], "sc": 8, "su": "Dr. Aaron Davis, Senior Research Leader of Plant Resources and Head of Coffee Research at the Royal Botanic Gardens, Kew, shares the history of Liberica coffee, recent genomic research that has redefi"}, {"t": "Perceptions and adaptation strategies to climate change in coffee farming: a systematic review", "s": "Europe PMC Coffee Research", "u": "https://doi.org/10.21203/rs.3.rs-9545672/v1", "p": "2026-05-08", "c": ["農場/產地", "種植/氣候"], "m": ["climate", "farmers", "smallholder"], "sc": 7, "su": "Abstract Coffee farming is an activity of major socioeconomic relevance, particularly in countries of the Global South, where it represents a primary source of income for millions of smallholder farme"}, {"t": "Brazil has set the template for how to drive domestic coffee consumption", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/05/brazil-driving-domestic-coffee-consumption/", "p": "Wed, 06 Ma", "c": ["農場/產地", "市場/價格"], "m": ["consumption", "harvest", "producer"], "sc": 7, "su": "Key takeaways Brazil remains the world’s largest coffee producer, and its domestic consumption is keeping pace with that status. Global commodities trader StoneX recently projected a record 182.5 mill"}, {"t": "New research shows coffee varieties lead to higher yields", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/coffee-varieties-leads-to-higher-yields-in-new-research/", "p": "Fri, 08 Ma", "c": ["農場/產地", "種植/氣候"], "m": ["robusta", "variety"], "sc": 6, "su": "New research shows that planting a mix of six robusta varieties can increase yields by up to 86 per cent while improving cup quality. Image: Nestlé. New research has shown that planting a mix of six r"}, {"t": "Can cafés actually reduce costs by roasting their own coffee?", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/05/can-cafes-reduce-costs-roasting-their-own-coffee/", "p": "Thu, 07 Ma", "c": ["烘焙/萃取技術", "市場/價格"], "m": ["prices", "roasting"], "sc": 6, "su": "Key takeaways With rising costs across the board, cafés are under more pressure than ever. Green coffee prices reached their highest recorded levels in early 2025, exceeding US$4/lb. However, while ra"}, {"t": "KDP reveals new beverage trend insights", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/kdp-reveals-new-beverage-trend-insights/", "p": "Wed, 06 Ma", "c": ["設備/自動化", "市場/價格"], "m": ["consumption", "data"], "sc": 6, "su": "Image: Swanya/stock.adobe.com Keurig Dr Pepper’s (KDP) second annual State of Beverages and Trend report has revealed the five trends the global beverage conglomerate believes are driving consumption "}, {"t": "The end-life cycle of coffee", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/the-end-life-cycle-of-coffee/", "p": "Wed, 06 Ma", "c": ["種植/氣候", "烘焙/萃取技術"], "m": ["espresso", "variety"], "sc": 6, "su": "Coffee holds significant potential to become a circular economy if it can be redirected from landfill. Image: zentrady_i3ell/stock.adobe.com. Coffee is one of the world’s largest organic waste greenho"}, {"t": "ColdPerk Introduces Commissary 70: A High-Volume Coffee Extraction System Built For Scalable Production", "s": "Sprudge", "u": "https://sprudge.com/coldperk-introduces-commissary-70-a-high-volume-coffee-extraction-system-built-for-scalable-production-971559.html", "p": "Wed, 06 Ma", "c": ["烘焙/萃取技術", "設備/自動化"], "m": ["extraction", "platform"], "sc": 6, "su": "This article is from the coffee website Sprudge at http://sprudge.com . This is the RSS feed version. The Commissary 70 brings ColdPerk’s proprietary extraction approach into a larger-format platform."}, {"t": "How technology is evolving for roasters", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/05/how-technology-is-evolving-for-roasters/", "p": "Tue, 05 Ma", "c": ["烘焙/萃取技術", "設備/自動化"], "m": ["roasting", "technology"], "sc": 6, "su": "Key takeaways Roasting coffee has always required significant investment. The equipment, expertise, and tools needed to maintain consistency and quality have historically favoured more established ope"}, {"t": "Evaluation of surface roughness, microhardness, and color change of 3D-printed resins post-polymerized with glycerin gel.", "s": "Europe PMC Coffee Research", "u": "https://doi.org/10.1186/s12903-026-08497-y", "p": "2026-05-01", "c": ["處理法/後製", "烘焙/萃取技術"], "m": ["processing", "water"], "sc": 6, "su": "The aim of this study was to investigate the effects of post-polymerization protocols with and without glycerin on surface roughness, microhardness, and color change of permanent restorative resins fa"}, {"t": "Effects of immersion in coffee solution and brushing on the surface roughness and color change of 3D-printed resins.", "s": "Europe PMC Coffee Research", "u": "https://europepmc.org/article/MED/41996145", "p": "2026-05-01", "c": ["烘焙/萃取技術", "設備/自動化"], "m": ["data", "water"], "sc": 6, "su": "The objective of this study was to compare changes in the surface roughness and color of 2 types of resin formulated for 3-dimensional (3D) printing and 1 resin formulated for computer-aided design/co"}, {"t": "Telling Coffee Stories | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-welcome-telling-coffee-stories", "p": "Wed, 29 Ap", "c": ["烘焙/萃取技術", "設備/自動化"], "m": ["chemistry", "data"], "sc": 6, "su": "One of 25’s goals is to share academic research on coffee in plain language and in free-to-access formats. But we also believe that the coffee sector is full of stories and that these stories are impo"}, {"t": "New paper charts the future of robusta coffee breeding", "s": "World Coffee Research", "u": "https://worldcoffeeresearch.org/news/new-global-review-charts-the-future-of-robusta-coffee-breeding", "p": "", "c": ["農場/產地", "種植/氣候"], "m": ["breeding", "robusta"], "sc": 6, "su": ""}, {"t": "Dialing In, Decoded: How Electrochemistry Helps Us Understand Espresso Extraction | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-research-dialing-in-decoded", "p": "Wed, 29 Ap", "c": ["烘焙/萃取技術"], "m": ["chemistry", "espresso", "extraction"], "sc": 5, "su": "The SCA’s Content Development Manager, Laurel Carmichael, speaks to researchers at the Hendon Coffee Lab about their chemistry lab that looks like a café, and about how they use electrochemistry and D"}, {"t": "CafeClima—a new science-based tool for climate-smart coffee replanting investments", "s": "World Coffee Research", "u": "https://worldcoffeeresearch.org/news/world-coffee-research-and-ciat-unveil-science-based-tool-for-climate-smart-coffee-replanting-investments", "p": "", "c": ["種植/氣候"], "m": ["climate", "climate-smart", "replanting"], "sc": 5, "su": ""}, {"t": "Roast Master Shows Off FAB Fluid-Bed Machines", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/06/roast-master-shows-off-fab-fluid-bed-machines/", "p": "Wed, 06 Ma", "c": ["烘焙/萃取技術"], "m": ["roast", "roasting"], "sc": 4, "su": "Fluid-bed roasting equipment company and green coffee seller Roast Master made its U.S. coffee trade show debut at World of Coffee in San Diego last month, launching a new generation..."}, {"t": "Comparative Study of Pleurotus ostreatus Cultivated Through Different Disinfection Methods Utilizing Coffee Parchment and Cenchrus fungigraminus", "s": "Europe PMC Coffee Research", "u": "https://doi.org/10.20944/preprints202605.0160.v1", "p": "2026-05-05", "c": ["農場/產地"], "m": ["farmers", "smallholder"], "sc": 4, "su": "Conventional sterilization limits smallholder mushroom cultivation in Papua New Guinea. This study evaluated alternative disinfection methods for Pleurotus ostreatus using coffee parchment and Juncao "}, {"t": "Making Markets Work: A Participatory Study of Specialty Coffee and Domestic Value Chains for Farmers| 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-insight-making-markets-work", "p": "Wed, 29 Ap", "c": ["農場/產地"], "m": ["farmer", "farmers"], "sc": 4, "su": "An interdisciplinary research team from Switzerland, Bolivia, and Colombia, led by Chahan Yeretzian, Nelson Gutiérrez Guzmán, and Johanna Jacobi, and including researchers Derly Lara, Daniel Castro, S"}, {"t": "Co-fermented coffees might be divisive, but there is clearly a market for them", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/04/market-for-co-fermented-coffees/", "p": "Mon, 27 Ap", "c": ["市場/價格"], "m": ["market", "prices"], "sc": 4, "su": "Key takeaways Despite their polarising nature, co-fermented coffees have grown considerably in popularity over the last few years. Roasters across the US, Japan, South Korea, the UAE, and parts of Eur"}, {"t": "Why Bluestone Lane Switched to Square to Run Its 65 Locations", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/2026/4/1/bluestone-lane-switched-to-square", "p": "Wed, 01 Ap", "c": ["設備/自動化"], "m": ["platform", "technology"], "sc": 4, "su": "Sponsored content by Square Bluestone Lane improved efficiency and customer service by implementing Square's integrated technology platform, optimizing operations, and enabling smarter business decisi"}, {"t": "Coffee News Recap, 8 May: EUDR set to include instant coffee, Honduras expected to produce over 6 million bags for 2026/27 harvest & other stories", "s": "Perfect Daily Grind", "u": "https://perfectdailygrind.com/2026/05/coffee-news-recap-8-may-2026/", "p": "Fri, 08 Ma", "c": ["農場/產地"], "m": ["harvest"], "sc": 3, "su": "Every Friday, Perfect Daily Grind rounds up the top coffee industry news from the week. Editor’s note The EUDR has covered coffee in almost all its forms since the regulation was first proposed, but i"}, {"t": "How Marco MilkPal can improve café efficiency", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/how-marco-milkpal-can-improve-cafe-efficiency/", "p": "Thu, 07 Ma", "c": ["設備/自動化"], "m": ["automation"], "sc": 3, "su": "The Marco MilkPal in action. Image: Marco Beverage Systems. According to those at Marco Beverage Systems, there’s a quiet shift happening behind coffee counters, less about spectacle and more about sy"}, {"t": "Nestlé Says Robusta Trial Shows Increased Yields and Quality in Côte d’Ivoire", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/07/nestle-says-robusta-trial-shows-increased-yields-and-quality-in-cote-divoire/", "p": "Thu, 07 Ma", "c": ["農場/產地"], "m": ["robusta"], "sc": 3, "su": "Multi-year field research by Nestlé and Côte d’Ivoire’s national agricultural research center found that planting a mix of six robusta coffee varieties can raise yields by up to 86% compared..."}, {"t": "Melbourne Coffee Group goes global", "s": "Global Coffee Report", "u": "https://www.gcrmag.com/melbourne-coffee-group-goes-global/", "p": "Wed, 06 Ma", "c": ["烘焙/萃取技術"], "m": ["espresso"], "sc": 3, "su": "Lance Brown has been a leader in Australian coffee for almost 30 years, and he’s launched his latest project to the world. Image: Prime Creative Media. Melbourne’s coffee is world famous, but what mak"}, {"t": "Royal Cup Coffee and Tea Completes Farmer Brothers Acquisition", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/06/royal-cup-coffee-and-tea-completes-farmer-brothers-acquisition/", "p": "Wed, 06 Ma", "c": ["農場/產地"], "m": ["farmer"], "sc": 3, "su": "Royal Cup Coffee and Tea has completed its acquisition of Farmer Brothers Coffee Co., bringing together two of the oldest U.S. commercial coffee companies under a single Birmingham, Alabama-based comp"}, {"t": "Flair Espresso Launches eWizard Steamer and 49 Pro Espresso Maker", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/05/flair-espresso-launches-ewizard-steamer-and-49-pro-espresso-maker/", "p": "Tue, 05 Ma", "c": ["烘焙/萃取技術"], "m": ["espresso"], "sc": 3, "su": "California-based home equipment company Flair Espresso launched two new products at the recent World of Coffee San Diego trade show: the eWizard standalone electric milk steamer and the Flair 49 Pro.."}, {"t": "Costa Rica Study Explores the Social Impact of Biennial Production Cycles", "s": "Daily Coffee News", "u": "https://dailycoffeenews.com/2026/05/04/costa-rica-study-explores-the-social-impact-of-biennial-production-cycles/", "p": "Mon, 04 Ma", "c": ["農場/產地"], "m": ["harvest"], "sc": 3, "su": "Although a steady fixture in the day-to-day lives of millions of consumers, coffee at the production level can often follow a “boom-and-bust” rhythm, with a larger harvest one year..."}, {"t": "Food-Grade Microbial Fermentation of Coffee Bean: From Improvement of Quality, Health Benefits, and Safety Factor to Its Sustainable Applications.", "s": "Europe PMC Coffee Research", "u": "https://doi.org/10.1111/1541-4337.70459", "p": "2026-05-01", "c": ["處理法/後製"], "m": ["fermentation"], "sc": 3, "su": "The coffee industry is under growing pressure to implement sustainable practices while enhancing product value. Food-grade microbial fermentation (FMF) offers a viable pathway for valorize coffee and "}, {"t": "LEARNING FROM THE FIELD: How Farm Labor Research Shaped the SCA’s Understanding of Specialty Coffee | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-program-spotlight-definition-of-specialty", "p": "Wed, 29 Ap", "c": ["農場/產地"], "m": ["farm"], "sc": 3, "su": "Peter Giuliano, SCA Senior Advisor of Science Communication, shares insights from research into the perspectives of coffee farm workers, and how this research has shaped knowledge building at the SCA."}, {"t": "From Stigma to Specialty: Developing the Canephora Flavor Wheel | 25, Issue 25", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/25/issue-25-insight-canephora-flavour-wheel", "p": "Wed, 29 Ap", "c": ["烘焙/萃取技術"], "m": ["sensory"], "sc": 3, "su": "Neuroscientist Dr. Fabiana Carvalho explores the specialty coffee sector's perceptions of canephora and how the development of the new Canephora Flavor Wheel could help cuppers better describe and val"}, {"t": "Announcing the 2026 SCA Sustainability Award Winners", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/2026-sca-sustainability-awards-winners", "p": "Mon, 30 Ma", "c": ["種植/氣候"], "m": ["sustainability"], "sc": 3, "su": "The Specialty Coffee Association (SCA) are proud to announce the 2026 Sustainability Award winners."}, {"t": "Perfectly Mineralized Water for Coffee: BWT bestbarista ROC COFFEE for Masterful Coffee Flavors", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/perfectly-mineralized-water-bwt-2026", "p": "Fri, 06 Ma", "c": ["烘焙/萃取技術"], "m": ["water"], "sc": 3, "su": "When the global coffee community gathers in San Diego from April 10–12 for World of Coffee, BWT water+more will showcase how perfectly optimized water becomes the true stage for exceptional coffee at "}, {"t": "Announcing the Finalists for the 2026 SCA Sustainability Awards", "s": "Specialty Coffee Association", "u": "https://sca.coffee/sca-news/2026-sca-sustainability-awards-finalists", "p": "Tue, 03 Ma", "c": ["種植/氣候"], "m": ["sustainability"], "sc": 3, "su": "The Specialty Coffee Association (SCA) are proud to announce the 2026 Sustainability Award finalists."}, {"t": "UNIDO and Coffee Industry Leaders Join Forces To Strengthen Uganda’s Coffee Seed Systems and Farmer Livelihoods", "s": "World Coffee Research", "u": "https://worldcoffeeresearch.org/news/unido-and-coffee-industry-leaders-join-forces-to-strengthen-ugandas-coffee-seed-systems-and-farmer-livelihoods", "p": "", "c": ["農場/產地"], "m": ["farmer"], "sc": 3, "su": ""}, {"t": "Third annual member day brings participants closer to the future of coffee at WCR farm", "s": "World Coffee Research", "u": "https://worldcoffeeresearch.org/news/2026/third-annual-member-day-brings-participants-closer-to-the-future-of-coffee-at-wcr-farm", "p": "", "c": ["農場/產地"], "m": ["farm"], "sc": 3, "su": ""}, {"t": "ICO Secretariat", "s": "International Coffee Organization", "u": "https://ico.org/what-we-do/secretariat/", "p": "", "c": ["市場/價格"], "m": ["ico"], "sc": 3, "su": ""}, {"t": "Public Market Information", "s": "International Coffee Organization", "u": "https://ico.org/resources/public-market-information/", "p": "", "c": ["市場/價格"], "m": ["market"], "sc": 3, "su": ""}, {"t": "ICO’s Statistical Rules and Regulations", "s": "International Coffee Organization", "u": "https://ico.org/resources/ico-statistical-rules-and-regulations/", "p": "", "c": ["市場/價格"], "m": ["ico"], "sc": 3, "su": ""}, {"t": "ICO Internship Programme", "s": "International Coffee Organization", "u": "https://ico.org/resources/ico-internship-programme/", "p": "", "c": ["市場/價格"], "m": ["ico"], "sc": 3, "su": ""}, {"t": "Coffee Sustainability Support Database", "s": "International Coffee Organization", "u": "http://c2sd.ico.org/", "p": "", "c": ["種植/氣候"], "m": ["sustainability"], "sc": 3, "su": ""}]
+;
+const ALL = DATA;
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+let activeFilter = null;
+let isDesktop = window.innerWidth > 900;
 
-// ── Nav background on scroll ──
-const nav = document.getElementById('nav');
-let lastScroll = 0;
-window.addEventListener('scroll', () => {
-  const current = window.scrollY;
-  if (current > 60) {
-    nav.classList.add('scrolled');
-  } else {
-    nav.classList.remove('scrolled');
-  }
-  lastScroll = current;
-}, { passive: true });
-
-// ── Radar dots parallax ──
-document.querySelectorAll('.radar-dot').forEach(dot => {
-  const speed = 0.02 + Math.random() * 0.03;
-  const startX = parseFloat(dot.style.left);
-  const startY = parseFloat(dot.style.top);
-  let ticking = false;
-
-  window.addEventListener('mousemove', (e) => {
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 2;
-        const y = (e.clientY / window.innerHeight - 0.5) * 2;
-        dot.style.transform = `translate(${x * speed * 100}px, ${y * speed * 100}px)`;
-        ticking = false;
-      });
-      ticking = true;
-    }
-  });
+window.addEventListener('resize', () => {
+  isDesktop = window.innerWidth > 900;
 });
+
+function loadDashboard() {
+  const btn = document.getElementById('loadBtn');
+  btn.classList.add('loading');
+  btn.querySelector('.arrow').textContent = '⟳';
+
+  setTimeout(() => {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.body.style.minHeight = 'auto';
+
+    if (isDesktop) {
+      renderDesktop();
+    } else {
+      renderMobile();
+    }
+  }, 600);
+}
+
+function resetView() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+  document.body.style.minHeight = '100dvh';
+  const btn = document.getElementById('loadBtn');
+  btn.classList.remove('loading');
+  btn.querySelector('.arrow').textContent = '→';
+  activeFilter = null;
+}
+
+function getSources(items) {
+  return [...new Set(items.map(i => i.s))];
+}
+
+function getCategories(items) {
+  const map = {};
+  items.forEach(i => i.c.forEach(c => { map[c] = (map[c]||0)+1 }));
+  return Object.entries(map).sort((a,b) => b[1]-a[1]);
+}
+
+function filtered() {
+  if (!activeFilter) return ALL;
+  return ALL.filter(i => i.c.includes(activeFilter));
+}
+
+function renderDesktop() {
+  const items = filtered();
+
+  document.getElementById('totalCount').textContent = ALL.length;
+  document.getElementById('sourceCount').textContent = getSources(ALL).length;
+
+  // Stats
+  const cats = getCategories(items);
+  document.getElementById('statsRow').innerHTML = `
+    <span class="stat-chip"><strong>${items.length}</strong> signals shown</span>
+    <span class="stat-chip"><strong>${getSources(items).length}</strong> sources</span>
+    ${cats.slice(0,3).map(([c,n]) => `<span class="stat-chip"><strong>${c}</strong> ${n}</span>`).join('')}
+  `;
+
+  // Sidebar filters
+  const allCats = getCategories(ALL);
+  document.getElementById('sidebar').innerHTML = `
+    <div class="filter-group">
+      <h4>Category</h4>
+      <div class="filter-tags">
+        <button class="filter-tag ${!activeFilter?'active':''}" onclick="setFilter(null)">
+          All <span class="count">${ALL.length}</span>
+        </button>
+        ${allCats.map(([c,n]) => `
+          <button class="filter-tag ${activeFilter===c?'active':''}" onclick="setFilter('${c}')">
+            ${c} <span class="count">${n}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // Cards
+  renderCards(items);
+}
+
+function renderCards(items) {
+  const grid = document.getElementById('cardsGrid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state">No signals match this category.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(i => `
+    <div class="card" onclick="window.open('${i.u}','_blank')">
+      <div class="card-top">
+        <span class="card-score">${i.sc}</span>
+        <div class="card-title">${i.t}</div>
+      </div>
+      <div class="card-meta">
+        <span class="card-source">${i.s}</span>
+        <span>${i.p}</span>
+      </div>
+      <div class="card-tags">
+        ${i.c.map(c => `<span class="card-tag">${c}</span>`).join('')}
+      </div>
+      <div class="card-summary">${i.su || ''}</div>
+    </div>
+  `).join('');
+}
+
+function renderMobile() {
+  const items = filtered();
+  document.getElementById('mobileTotal').textContent = ALL.length;
+  document.getElementById('mobileSourceCount').textContent = getSources(ALL).length;
+
+  // Filters
+  const allCats = getCategories(ALL);
+  document.getElementById('mobileFilters').innerHTML = `
+    <button class="filter-tag ${!activeFilter?'active':''}" onclick="setFilter(null)">All ${ALL.length}</button>
+    ${allCats.map(([c,n]) => `
+      <button class="filter-tag ${activeFilter===c?'active':''}" onclick="setFilter('${c}')">${c} ${n}</button>
+    `).join('')}
+  `;
+
+  // Cards
+  const cards = document.getElementById('mobileCards');
+  if (!items.length) {
+    cards.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:.85rem">No signals match.</div>';
+    return;
+  }
+  cards.innerHTML = items.map(i => `
+    <div class="card" onclick="window.open('${i.u}','_blank')">
+      <div class="card-top">
+        <span class="card-score">${i.sc}</span>
+        <div class="card-title">${i.t}</div>
+      </div>
+      <div class="card-meta">
+        <span class="card-source">${i.s}</span>
+        <span>${i.p}</span>
+      </div>
+      <div class="card-tags">
+        ${i.c.map(c => `<span class="card-tag">${c}</span>`).join('')}
+      </div>
+      <div class="card-summary">${i.su || ''}</div>
+    </div>
+  `).join('');
+}
+
+function setFilter(cat) {
+  activeFilter = cat;
+  if (isDesktop) {
+    renderDesktop();
+  } else {
+    renderMobile();
+  }
+}
+
+// ── Radar dots ──
+(function() {
+  const container = document.getElementById('radarDots');
+  if (!container) return;
+  const positions = [
+    [22,68],[45,82],[65,28],[30,18],[72,65],[15,48],[55,12],[38,72],
+    [78,42],[12,58],[62,78],[48,8],[82,55],[8,38],[58,88],[92,48],
+  ];
+  positions.forEach(([t,l],i) => {
+    const dot = document.createElement('div');
+    dot.className = 'radar-dot' + (i < 8 ? ' active' : '');
+    dot.style.cssText = `top:${t}%;left:${l}%;animation-delay:${i*0.15}s`;
+    container.appendChild(dot);
+  });
+})();
 </script>
 
 </body>
