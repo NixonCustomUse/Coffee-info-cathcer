@@ -1,6 +1,6 @@
-# Coffee Radar
+# Coffee Info Catcher
 
-Coffee Radar 是一個咖啡資訊自動收集器的 MVP。它會從 RSS feed 與公開頁面抓取資料，依照關鍵字把內容分成「農場/產地」「種植/氣候」「處理法/後製」「烘焙/萃取技術」「設備/自動化」「市場/價格」等類別，最後輸出 Markdown 報告與 JSONL 原始資料。
+Coffee Info Catcher（原 Coffee Radar）是一個咖啡資訊自動收集器。它會從 RSS feed 與公開頁面抓取資料，依照關鍵字把內容分成「農場/產地」「種植/氣候」「處理法/後製」「烘焙/萃取技術」「設備/自動化」「市場/價格」等類別，最後輸出 Markdown 報告與 JSONL 原始資料。
 
 ## 快速開始
 
@@ -44,21 +44,28 @@ python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 流程會做四件事：
 
 - 收集最近咖啡資訊
-- 產生中文摘要，優先使用 OpenAI API；沒有 API key 時使用本地規則摘要
+- 產生中文摘要，優先使用 OpenRouter API（相容 OpenAI）；沒有 API key 時使用本地規則摘要
 - 用本地 SQLite 記錄已同步網址，避免重複匯入同一篇文章
 - 匯入 Notion；每週一額外產生週報文章並同步到 Coffee Radar 主頁
 
-需要的環境變數：
+所有設定集中在 `config.py`，會從環境變數讀取。需要的變數：
+
+```bash
+export OPENROUTER_API_KEY="sk-or-..."    # 主要 API key（OpenRouter）
+export NOTION_TOKEN=""
+```
+
+也可沿用舊的 OpenAI key（當 `OPENROUTER_API_KEY` 未設定時自動降級）：
 
 ```bash
 export OPENAI_API_KEY=""
-export NOTION_TOKEN=""
 ```
 
 可選設定：
 
 ```bash
-export OPENAI_MODEL=""
+export OPENROUTER_MODEL="openai/gpt-4o"  # 預設模型
+export OPENROUTER_API_URL=""             # 自訂 endpoint
 ```
 
 Notion 頁面與資料庫 ID 放在 `notion_config.json`。目前已指向：
