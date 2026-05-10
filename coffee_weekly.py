@@ -12,6 +12,7 @@ from typing import Any
 
 from coffee_ai import generate_weekly_article, load_jsonl
 from coffee_radar import UTC, parse_date
+import config
 
 
 def item_date(item: dict[str, Any]) -> dt.date | None:
@@ -68,8 +69,8 @@ def main(argv: list[str] | None = None) -> int:
     dated.write_text(article, encoding="utf-8")
     shutil.copyfile(dated, latest)
     print(f"Saved weekly article to {dated}")
-    if not os.getenv("OPENAI_API_KEY") and not args.no_ai:
-        print("OPENAI_API_KEY is missing; used fallback weekly article.")
+    if not config.LLM_API_KEY and not args.no_ai:
+        print("LLM_API_KEY is missing; used fallback weekly article.")
     return 0
 
 

@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import os
 import sqlite3
 import sys
 import urllib.error
@@ -17,10 +16,7 @@ from typing import Any
 
 from coffee_ai import load_jsonl
 from coffee_radar import UTC, normalize_url, parse_date
-
-
-NOTION_API_BASE = "https://api.notion.com/v1"
-NOTION_VERSION = "2022-06-28"
+import config
 
 
 @dataclass
@@ -94,30 +90,25 @@ def load_config(path: Path) -> NotionConfig:
     if path.exists():
         data = json.loads(path.read_text(encoding="utf-8"))
     return NotionConfig(
-        articles_database_id=os.getenv("NOTION_ARTICLES_DATABASE_ID", data.get("articles_database_id", "")),
-        sources_database_id=os.getenv("NOTION_SOURCES_DATABASE_ID", data.get("sources_database_id", "")),
-        weekly_parent_page_id=os.getenv("NOTION_WEEKLY_PARENT_PAGE_ID", data.get("weekly_parent_page_id", "")),
+        articles_database_id=config.NOTION_ARTICLES_DATABASE_ID or data.get("articles_database_id", ""),
+        sources_database_id=config.NOTION_SOURCES_DATABASE_ID or data.get("sources_database_id", ""),
+        weekly_parent_page_id=config.NOTION_WEEKLY_PARENT_PAGE_ID or data.get("weekly_parent_page_id", ""),
     )
 
 
-def notion_token() -> str:
-    return os.getenv("NOTION_TOKEN", "")
-
-
 def notion_request(method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-    token = notion_token()
-    if not token:
+    if not config.NOTION_TOKEN:
         raise RuntimeError("NOTION_TOKEN is missing.")
 
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = urllib.request.Request(
-        f"{NOTION_API_BASE}/{path.lstrip('/')}",
+        f"https://api.notion.com/v1/{path.lstrip('/')}",
         data=data,
         method=method,
         headers={
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"Bearer {config.NOTION_TOKEN}",
             "Content-Type": "application/json",
-            "Notion-Version": NOTION_VERSION,
+            "Notion-Version": config.NOTION_VERSION,
         },
     )
     try:
@@ -303,7 +294,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
-    if not notion_token() and not args.dry_run:
+    if not config.NOTION_TOKEN and not args.dry_run:
         message = "NOTION_TOKEN is missing; skipped Notion sync."
         if args.skip_notion_if_unconfigured:
             print(message)

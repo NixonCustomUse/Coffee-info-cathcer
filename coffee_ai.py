@@ -16,9 +16,7 @@ from typing import Any
 
 from coffee_radar import clean_text
 
-
-OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = "gpt-5.2"
+import config
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -35,48 +33,44 @@ def write_jsonl(items: list[dict[str, Any]], path: Path) -> None:
 
 
 def extract_response_text(response: dict[str, Any]) -> str:
-    if isinstance(response.get("output_text"), str):
-        return response["output_text"].strip()
-
-    parts: list[str] = []
-    for output in response.get("output", []):
-        if output.get("type") != "message":
-            continue
-        for content in output.get("content", []):
-            if content.get("type") in {"output_text", "text"} and content.get("text"):
-                parts.append(content["text"])
-    return "\n".join(parts).strip()
+    for choice in response.get("choices", []):
+        message = choice.get("message", {})
+        content = message.get("content", "")
+        if content:
+            return content.strip()
+    return ""
 
 
 def openai_text(instructions: str, input_text: str, max_output_tokens: int = 700) -> str | None:
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+    if not config.LLM_API_KEY:
         return None
 
     payload = {
-        "model": os.getenv("OPENAI_MODEL", DEFAULT_MODEL),
-        "instructions": instructions,
-        "input": input_text,
-        "max_output_tokens": max_output_tokens,
+        "model": config.LLM_MODEL,
+        "messages": [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": input_text},
+        ],
+        "max_tokens": max_output_tokens,
     }
     request = urllib.request.Request(
-        OPENAI_RESPONSES_URL,
+        config.LLM_API_URL,
         data=json.dumps(payload).encode("utf-8"),
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {config.LLM_API_KEY}",
             "Content-Type": "application/json",
         },
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=45) as response:
+        with urllib.request.urlopen(request, timeout=config.LLM_TIMEOUT) as response:
             raw = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         details = exc.read().decode("utf-8", errors="replace")
-        print(f"OpenAI summary failed: HTTP {exc.code} {details}", file=sys.stderr)
+        print(f"OpenRouter API failed: HTTP {exc.code} {details}", file=sys.stderr)
         return None
     except urllib.error.URLError as exc:
-        print(f"OpenAI summary failed: {exc}", file=sys.stderr)
+        print(f"OpenRouter API failed: {exc}", file=sys.stderr)
         return None
 
     return extract_response_text(json.loads(raw))
@@ -280,8 +274,8 @@ def main(argv: list[str] | None = None) -> int:
     enriched = enrich_items(items, use_ai=not args.no_ai, force=args.force)
     write_jsonl(enriched, Path(args.output))
     print(f"Saved {len(enriched)} enriched items to {args.output}")
-    if not os.getenv("OPENAI_API_KEY") and not args.no_ai:
-        print("OPENAI_API_KEY is missing; used fallback Chinese summaries.", file=sys.stderr)
+    if not config.LLM_API_KEY and not args.no_ai:
+        print("LLM_API_KEY is missing; used fallback Chinese summaries.", file=sys.stderr)
     return 0
 
 
