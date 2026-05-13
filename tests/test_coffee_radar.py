@@ -2,20 +2,18 @@ import unittest
 import tempfile
 from pathlib import Path
 
-from coffee_ai import fallback_summary_zh, generate_weekly_article
-from coffee_notion_sync import SyncState
-from coffee_radar import (
-    Source,
+from coffee.sources import Source
+from coffee.classify import (
     classify,
     item_matches_segment,
-    parse_crossref,
-    parse_europe_pmc,
-    parse_feed,
     is_recent,
     is_relevant_item,
     SEGMENT_DEFINITIONS,
 )
-from coffee_weekly import select_recent_items
+from coffee.parsers import parse_crossref, parse_europe_pmc, parse_feed
+from coffee_ai import fallback_summary_zh
+from coffee_weekly import select_recent_items, generate_weekly_article
+from coffee_notion_sync import SyncState
 
 
 SAMPLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -76,7 +74,6 @@ class CoffeeRadarTest(unittest.TestCase):
                 }
             ],
             title="Coffee Radar 週報：2026-W19",
-            use_ai=False,
         )
         self.assertIn("新研究與產地訊號", article)
         self.assertIn("下週追蹤問題", article)

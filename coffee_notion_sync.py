@@ -14,8 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from coffee_ai import load_jsonl
-from coffee_radar import UTC, normalize_url, parse_date
+from coffee.util import UTC, normalize_url, parse_date, load_jsonl
 import config
 
 

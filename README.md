@@ -1,6 +1,8 @@
 # Coffee Info Catcher
 
-Coffee Info Catcher（原 Coffee Radar）是一個咖啡資訊自動收集器。它會從 RSS feed 與公開頁面抓取資料，依照關鍵字把內容分成「農場/產地」「種植/氣候」「處理法/後製」「烘焙/萃取技術」「設備/自動化」「市場/價格」等類別，最後輸出 Markdown 報告與 JSONL 原始資料。
+Coffee Info Catcher（原 Coffee Radar）是一個咖啡資訊自動收集器。從 RSS feed、公開頁面、Crossref 與 Europe PMC 抓取資料，分類為 6 大類別，輸出 Markdown 報告與 JSONL。
+
+**零依賴** — 僅使用 Python 標準函式庫，無需 `pip install`。
 
 ## 快速開始
 
@@ -8,10 +10,7 @@ Coffee Info Catcher（原 Coffee Radar）是一個咖啡資訊自動收集器。
 python3 coffee_radar.py
 ```
 
-預設輸出：
-
-- `reports/latest.md`: 可閱讀的中文摘要報告
-- `data/items.jsonl`: 後續可匯入資料庫或試算表的原始資料
+預設輸出：`reports/latest.md`（摘要報告）、`data/items.jsonl`（原始資料）。
 
 常用參數：
 
@@ -19,105 +18,56 @@ python3 coffee_radar.py
 python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 ```
 
-- `--days`: 只保留最近幾天的內容；日期缺失的項目會保留
-- `--limit`: Markdown 報告最多顯示幾筆
-- `--min-score`: 關鍵字門檻，數字越高越嚴格
+- `--days`：保留最近幾天的內容
+- `--limit`：報告最多顯示幾筆
+- `--min-score`：關鍵字門檻，越高越嚴格
 
-執行收集時，終端機會顯示每個來源的進度條與狀態（OK/FAIL）。
-
-完整流程建議直接使用一鍵腳本：
+## 完整流程
 
 ```bash
 ./run_daily_sync.sh
 ```
 
-`run_coffee_radar.sh` 僅保留給除錯或單獨重跑資料收集時使用。
+順序執行：
+1. `coffee_radar.py` — 收集資料（`data/items.jsonl`）
+2. `coffee_ai.py` — 產生中文摘要（`data/items.enriched.jsonl`）
+3. `coffee_notion_sync.py` — 同步到 Notion（每週一額外產生週報）
 
-## 同步到 Notion
+## 環境變數
 
-這個專案現在有完整同步流程：
+| 變數 | 預設值 | 說明 |
+|------|--------|------|
+| `OPENROUTER_API_KEY` | `""` | 主要 LLM key（無則降級 OpenAI） |
+| `OPENAI_API_KEY` | `""` | 降級備援 |
+| `NOTION_TOKEN` | `""` | |
+| `OPENROUTER_MODEL` | `openrouter/free` | |
+| `NOTION_ARTICLES_DATABASE_ID` | 來自 `notion_config.json` | 環境變數優先 |
+
+Notion 資料庫 ID 優先讀取環境變數，未設定時讀取 `notion_config.json`。
+
+## 測試
 
 ```bash
-./run_daily_sync.sh
+python3 -m unittest tests/test_coffee_radar.py
+python3 -m unittest tests.test_coffee_radar.CoffeeRadarTest.test_parse_feed_and_classify
 ```
 
-流程會做四件事：
-
-- 收集最近咖啡資訊
-- 產生中文摘要，優先使用 OpenRouter API（相容 OpenAI）；沒有 API key 時使用本地規則摘要
-- 用本地 SQLite 記錄已同步網址，避免重複匯入同一篇文章
-- 匯入 Notion；每週一額外產生週報文章並同步到 Coffee Radar 主頁
-
-所有設定集中在 `config.py`，會從環境變數讀取。需要的變數：
+## 其他操作
 
 ```bash
-export OPENROUTER_API_KEY="sk-or-..."    # 主要 API key（OpenRouter）
-export NOTION_TOKEN=""
-```
+# 僅產生中文摘要（使用本地規則，不呼叫 API）
+python3 coffee_ai.py --input data/items.jsonl --no-ai
 
-也可沿用舊的 OpenAI key（當 `OPENROUTER_API_KEY` 未設定時自動降級）：
-
-```bash
-export OPENAI_API_KEY=""
-```
-
-可選設定：
-
-```bash
-export OPENROUTER_MODEL="openai/gpt-4o"  # 預設模型
-export OPENROUTER_API_URL=""             # 自訂 endpoint
-```
-
-Notion 頁面與資料庫 ID 放在 `notion_config.json`。目前已指向：
-
-- Coffee Radar 主頁
-- Coffee Radar Articles
-- Coffee Radar Sources
-
-本專案只保留一份 `notion_config.json`，請直接填入自己的 Notion 資源 ID。
-
-## 每週自動執行
-
-可用 macOS/Linux 的排程工具每週跑一次 `run_daily_sync.sh`。如果用 Codex 自動化，已可設定每週固定時間執行。
-
-## 每週文章
-
-手動產生週報：
-
-```bash
+# 手動產生週報
 python3 coffee_weekly.py --input data/items.enriched.jsonl
+
+# Notion 同步乾跑
+python3 coffee_notion_sync.py --items data/items.enriched.jsonl --dry-run
+
+# 產生 HTML 儀表板
+python3 generate_html.py --input data/items.enriched.jsonl --output reports/report.html
 ```
-
-輸出位置：
-
-- `reports/weekly/latest.md`
-- `reports/weekly/YYYY-Www.md`
-
-週報會整理：
-
-- 這個星期發生了什麼
-- 有什麼新的研究
-- 有什麼新的技術、設備或產品
-- 市場與商業模式有哪些變化
-- 下週應該追蹤什麼問題
 
 ## 資料來源
 
-目前來源放在 `sources.json`，可以直接增減：
-
-- Daily Coffee News
-- World Coffee Research
-- Specialty Coffee Association
-- Coffee Science Foundation
-- Perfect Daily Grind
-- Sprudge
-- Global Coffee Report
-- International Coffee Organization
-
-如果某個網站沒有 RSS，可以把 `kind` 設成 `page`，程式會抽取頁面上的連結，再用標題做初步分類。
-
-## 下一步可以加的功能
-
-- 加入更多來源，例如學術論文、專利、咖啡設備品牌公告、產區組織新聞
-- 依「農場」「處理法」「氣候科技」「設備」分成不同報告
-- 把週報再同步到 Email、Telegram 或 Slack
+20 個來源（RSS / 頁面 / 學術 API），透過 `sources.json` 的 `enabled` 欄位開關。來源類型：`feed`（RSS/Atom）、`page`（抽取頁面連結）、`crossref`、`europe_pmc`（含專利）。
