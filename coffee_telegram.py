@@ -17,18 +17,11 @@ from coffee.util import UTC, load_jsonl, parse_date
 
 def build_keyboard(items: list[dict]) -> list[list[dict]]:
     keyboard = []
-    row = []
-    for i, item in enumerate(items):
+    for item in items:
         url = item.get("url", "")
-        title = item.get("title", "")
+        source = item.get("source", "")
         if url:
-            label = f"{i + 1}. {title[:60]}"
-            row.append({"text": label, "url": url})
-            if len(row) == 2:
-                keyboard.append(row)
-                row = []
-    if row:
-        keyboard.append(row)
+            keyboard.append([{"text": source[:40], "url": url}])
     return keyboard
 
 
@@ -43,8 +36,8 @@ def build_daily_body(items: list[dict], limit: int = 5) -> tuple[str, list[list[
 
     if not filtered:
         return (
-            f"☕ 咖啡日報 — {yesterday}\n"
-            f"─────────────────\n"
+            f"☕ 咖啡日報 — {yesterday.month}/{yesterday.day}\n"
+            f"────────────────\n"
             f"昨天沒有新訊號。",
             [],
         )
@@ -54,29 +47,81 @@ def build_daily_body(items: list[dict], limit: int = 5) -> tuple[str, list[list[
     for i in filtered:
         for c in i.get("categories", []):
             cats[c] += 1
-    cat_summary = "、".join(f"{c}({n})" for c, n in cats.most_common())
+    cat_summary = " · ".join(f"{c}({n})" for c, n in cats.most_common())
 
     lines = [
-        f"☕ 咖啡日報 — {yesterday}",
-        f"─────────────────",
-        f"昨天共 {len(filtered)} 則咖啡訊號",
-        "",
-        f"分類：{cat_summary}",
+        f"☕ 咖啡日報 — {yesterday.month}/{yesterday.day}",
+        f"────────────────",
+        f"{len(filtered)} 則 | {cat_summary}",
         "",
     ]
 
-    for i, item in enumerate(top, 1):
+    for item in top:
         title = item.get("title", "")
         source = item.get("source", "")
-        categories = "、".join(item.get("categories", []))
-        summary = (item.get("zh_summary", "") or "").strip()
-        lines.append(f"{i}. {title}")
-        lines.append(f"   {source} · {categories}")
-        if summary:
-            short = summary[:100] + "…" if len(summary) > 100 else summary
-            lines.append(f"   {short}")
+        lines.append(f"<b>{source}</b>")
+        lines.append(title)
+        lines.append("")
 
     keyboard = build_keyboard(top)
+    return "\n".join(lines), keyboard
+
+
+def build_digest_body(items: list[dict], limit: int = 3) -> tuple[str, list[list[dict]]]:
+    now = dt.datetime.now(UTC)
+    monday = now - dt.timedelta(days=now.weekday())
+    sunday = monday + dt.timedelta(days=6)
+
+    filtered = []
+    for i in items:
+        pub = parse_date(i.get("published", ""))
+        if pub and monday.date() <= pub.date() <= sunday.date():
+            filtered.append(i)
+
+    if not filtered:
+        return (
+            f"☕ 本週精選 — W{now.isocalendar()[1]}\n"
+            f"────────────────\n"
+            f"本週沒有新訊號。",
+            [],
+        )
+
+    by_date: dict[dt.date, list[dict]] = {}
+    for i in filtered:
+        pub = parse_date(i.get("published", ""))
+        if pub:
+            by_date.setdefault(pub.date(), []).append(i)
+
+    cats = Counter()
+    for i in filtered:
+        for c in i.get("categories", []):
+            cats[c] += 1
+    cat_summary = " · ".join(f"{c}({n})" for c, n in cats.most_common())
+
+    sources = len({i.get("source", "") for i in filtered})
+
+    lines = [
+        f"☕ 本週精選 — W{now.isocalendar()[1]}",
+        f"────────────────",
+        f"{len(filtered)} 則 · {sources} 來源 | {cat_summary}",
+        "",
+    ]
+
+    weekday_zh = ["(一)", "(二)", "(三)", "(四)", "(五)", "(六)", "(日)"]
+
+    all_top_items: list[dict] = []
+    for date in sorted(by_date.keys(), reverse=True):
+        day_items = sorted(by_date[date], key=lambda i: i.get("score", 0), reverse=True)[:limit]
+        lines.append(f"📅 {date.month}/{date.day} {weekday_zh[date.weekday()]}")
+        for item in day_items:
+            title = item.get("title", "")
+            source = item.get("source", "")
+            lines.append(f"<b>{source}</b>")
+            lines.append(title)
+            lines.append("")
+        all_top_items.extend(day_items)
+
+    keyboard = build_keyboard(all_top_items)
     return "\n".join(lines), keyboard
 
 
@@ -109,6 +154,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--input", default="data/items.enriched.jsonl")
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--digest", action="store_true", help="Generate weekly digest instead of daily report")
     parser.add_argument("--token", help="Bot token (or TELEGRAM_BOT_TOKEN env)")
     parser.add_argument("--chat-id", help="Chat ID (or TELEGRAM_CHAT_ID env)")
     return parser
@@ -117,7 +163,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     items = load_jsonl(Path(args.input))
-    text, keyboard = build_daily_body(items, limit=args.limit)
+
+    if args.digest:
+        text, keyboard = build_digest_body(items, limit=args.limit)
+    else:
+        text, keyboard = build_daily_body(items, limit=args.limit)
 
     if args.dry_run:
         print(text)
