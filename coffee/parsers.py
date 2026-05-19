@@ -190,6 +190,35 @@ def parse_europe_pmc(source: Source, payload: dict[str, object]) -> list[Item]:
     return items
 
 
+def parse_reddit(source: Source, raw: str) -> list[Item]:
+    ns = {"atom": "http://www.w3.org/2005/Atom"}
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError:
+        root = ET.fromstring(normalize_xml_entities(raw))
+    items: list[Item] = []
+    for entry in root.findall("atom:entry", ns):
+        title_el = entry.find("atom:title", ns)
+        link_el = entry.find("atom:link[@rel='alternate']", ns)
+        pub_el = entry.find("atom:published", ns)
+        content_el = entry.find("atom:content", ns)
+        summary_el = entry.find("atom:summary", ns)
+
+        title = clean_text(title_el.text) if title_el is not None and title_el.text else ""
+        url = link_el.get("href", "") if link_el is not None else ""
+        published = pub_el.text.strip() if pub_el is not None and pub_el.text else ""
+
+        raw_text = ""
+        if content_el is not None and content_el.text:
+            raw_text = clean_text(content_el.text)
+        elif summary_el is not None and summary_el.text:
+            raw_text = clean_text(summary_el.text)
+
+        item = Item(source.name, title, normalize_url(url), published, raw_text)
+        items.append(item)
+    return items
+
+
 def parse_page(source: Source, content: str) -> list[Item]:
     parser = LinkExtractor(source.url)
     parser.feed(content)

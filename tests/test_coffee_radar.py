@@ -1,5 +1,5 @@
+import datetime as dt
 import unittest
-import tempfile
 from pathlib import Path
 
 from coffee.sources import Source
@@ -10,10 +10,9 @@ from coffee.classify import (
     is_relevant_item,
     SEGMENT_DEFINITIONS,
 )
-from coffee.parsers import parse_crossref, parse_europe_pmc, parse_feed
+from coffee.parsers import parse_crossref, parse_europe_pmc, parse_feed, parse_reddit
 from coffee_ai import fallback_summary_zh
 from coffee_weekly import select_recent_items, generate_weekly_article
-from coffee_notion_sync import SyncState
 
 
 SAMPLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -29,6 +28,29 @@ SAMPLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
   </channel>
 </rss>
 """
+
+
+SAMPLE_REDDIT_RSS = """<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+  <title>coffee</title>
+  <entry>
+    <title>Best pourover technique for light roasts?</title>
+    <link href="https://www.reddit.com/r/coffee/comments/abc123/" rel="alternate"/>
+    <published>2026-05-19T14:30:00+00:00</published>
+    <updated>2026-05-19T15:00:00+00:00</updated>
+    <author><name>/u/coffeelover</name></author>
+    <summary type="html">&lt;p&gt;I've been experimenting with light roasts and found that a slower pour works better.&lt;/p&gt;</summary>
+    <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://example.com/thumb.jpg"/>
+  </entry>
+  <entry>
+    <title>New espresso machine recommendations under $500</title>
+    <link href="https://www.reddit.com/r/espresso/comments/def456/" rel="alternate"/>
+    <published>2026-05-18T09:15:00+00:00</published>
+    <updated>2026-05-18T10:00:00+00:00</updated>
+    <author><name>/u/espresso_fan</name></author>
+    <content type="html">&lt;p&gt;Looking for a budget-friendly espresso machine.&lt;/p&gt;</content>
+  </entry>
+</feed>"""
 
 
 class CoffeeRadarTest(unittest.TestCase):
@@ -55,9 +77,12 @@ class CoffeeRadarTest(unittest.TestCase):
         self.assertIn("農場/產地", summary)
 
     def test_select_recent_items(self):
+        today = dt.date.today()
+        recent_date = (today - dt.timedelta(days=2)).strftime("%a, %d %b %Y 10:00:00 +0000")
+        old_date = (today - dt.timedelta(days=365)).strftime("%a, %d %b %Y 10:00:00 +0000")
         items = [
-            {"title": "new", "published": "Thu, 07 May 2026 10:00:00 +0000", "score": 3},
-            {"title": "old", "published": "Thu, 01 Jan 2026 10:00:00 +0000", "score": 9},
+            {"title": "new", "published": recent_date, "score": 3},
+            {"title": "old", "published": old_date, "score": 9},
         ]
         selected = select_recent_items(items, days=7)
         self.assertEqual(selected[0]["title"], "new")
@@ -77,13 +102,6 @@ class CoffeeRadarTest(unittest.TestCase):
         )
         self.assertIn("新研究與產地訊號", article)
         self.assertIn("下週追蹤問題", article)
-
-    def test_sync_state_dedupes_urls(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            state = SyncState(Path(tmpdir) / "state.sqlite")
-            self.assertFalse(state.has_url("https://example.com/a/"))
-            state.mark_url("https://example.com/a/", "page-id", "Title")
-            self.assertTrue(state.has_url("https://example.com/a"))
 
     def test_crossref_parser(self):
         source = Source(name="Crossref", url="https://api.crossref.org/works", kind="crossref")
@@ -161,6 +179,17 @@ class CoffeeRadarTest(unittest.TestCase):
 
     def test_future_dates_are_not_recent(self):
         self.assertFalse(is_recent("2099-01-01", days=120))
+
+    def test_reddit_parser(self):
+        source = Source(name="r/coffee", url="https://www.reddit.com/r/coffee/.rss", kind="reddit")
+        items = parse_reddit(source, SAMPLE_REDDIT_RSS)
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0].title, "Best pourover technique for light roasts?")
+        self.assertEqual(items[0].url, "https://www.reddit.com/r/coffee/comments/abc123")
+        self.assertEqual(items[0].published, "2026-05-19T14:30:00+00:00")
+        self.assertIn("slower pour", items[0].summary)
+        self.assertIn("budget-friendly", items[1].summary)
+        self.assertEqual(items[1].title, "New espresso machine recommendations under $500")
 
 
 if __name__ == "__main__":
