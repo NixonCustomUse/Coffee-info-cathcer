@@ -10,6 +10,6 @@ from coffee.classify import (
     SEGMENT_DEFINITIONS,
 )
 from coffee.parsers import (
-    parse_feed, parse_page, parse_crossref, parse_europe_pmc,
+    parse_feed, parse_page, parse_crossref, parse_europe_pmc, parse_reddit,
 )
 from coffee.report import write_markdown, write_segment_reports

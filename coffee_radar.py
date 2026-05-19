@@ -10,7 +10,7 @@ from pathlib import Path
 from coffee import (
     Source, Item, load_sources, classify, is_recent, is_relevant_item,
     dedupe, sort_key, item_to_dict, write_jsonl, fetch_json, fetch_text,
-    parse_crossref, parse_europe_pmc, parse_feed, parse_page,
+    parse_crossref, parse_europe_pmc, parse_feed, parse_page, parse_reddit,
     write_markdown, write_segment_reports,
 )
 
@@ -30,6 +30,9 @@ def collect(
                 parsed_items = parse_crossref(source, fetch_json(source.url))
             elif source.kind == "europe_pmc":
                 parsed_items = parse_europe_pmc(source, fetch_json(source.url))
+            elif source.kind == "reddit":
+                content = fetch_text(source.url)
+                parsed_items = parse_reddit(source, content)
             else:
                 content = fetch_text(source.url)
                 parsed_items = (

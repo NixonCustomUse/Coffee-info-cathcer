@@ -131,5 +131,41 @@
     "kind": "page",
     "tags": ["origin-organization", "uganda"],
     "enabled": true
+  },
+  {
+    "name": "r/coffee",
+    "url": "https://www.reddit.com/r/coffee/.rss",
+    "kind": "reddit",
+    "enabled": true
+  },
+  {
+    "name": "r/espresso",
+    "url": "https://www.reddit.com/r/espresso/.rss",
+    "kind": "reddit",
+    "enabled": true
+  },
+  {
+    "name": "r/roasting",
+    "url": "https://www.reddit.com/r/roasting/.rss",
+    "kind": "reddit",
+    "enabled": true
+  },
+  {
+    "name": "r/pourover",
+    "url": "https://www.reddit.com/r/pourover/.rss",
+    "kind": "reddit",
+    "enabled": true
+  },
+  {
+    "name": "r/cafe",
+    "url": "https://www.reddit.com/r/cafe/.rss",
+    "kind": "reddit",
+    "enabled": true
+  },
+  {
+    "name": "r/coffeesnobs",
+    "url": "https://www.reddit.com/r/coffeesnobs/.rss",
+    "kind": "reddit",
+    "enabled": true
   }
 ]
