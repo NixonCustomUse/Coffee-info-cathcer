@@ -26,19 +26,20 @@ def build_keyboard(items: list[dict]) -> list[list[dict]]:
 
 
 def build_daily_body(items: list[dict], limit: int = 5) -> tuple[str, list[list[dict]]]:
-    yesterday = dt.datetime.now(UTC).date() - dt.timedelta(days=1)
+    now = dt.datetime.now(UTC).date()
+    week_ago = now - dt.timedelta(days=7)
 
     filtered = []
     for i in items:
         pub = parse_date(i.get("published", ""))
-        if pub and pub.date() == yesterday:
+        if pub and week_ago <= pub.date() <= now:
             filtered.append(i)
 
     if not filtered:
         return (
-            f"☕ 咖啡日報 — {yesterday.month}/{yesterday.day}\n"
+            f"☕ 咖啡日報 — {now.month}/{now.day}\n"
             f"────────────────\n"
-            f"昨天沒有新訊號。",
+            f"過去 7 天沒有新訊號。",
             [],
         )
 
@@ -49,10 +50,12 @@ def build_daily_body(items: list[dict], limit: int = 5) -> tuple[str, list[list[
             cats[c] += 1
     cat_summary = " · ".join(f"{c}({n})" for c, n in cats.most_common())
 
+    sources = len({i.get("source", "") for i in filtered})
+
     lines = [
-        f"☕ 咖啡日報 — {yesterday.month}/{yesterday.day}",
+        f"☕ 咖啡週報 — {now.month}/{now.day}",
         f"────────────────",
-        f"{len(filtered)} 則 | {cat_summary}",
+        f"{len(filtered)} 則 | {sources} 來源 | {cat_summary}",
         "",
     ]
 
