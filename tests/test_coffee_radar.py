@@ -11,7 +11,7 @@ from coffee.classify import (
     SEGMENT_DEFINITIONS,
 )
 from coffee.parsers import parse_crossref, parse_europe_pmc, parse_feed, parse_reddit
-from coffee_radar import _fallback_summary_zh
+from coffee_radar import _enrich_items, _fallback_summary_zh
 
 
 SAMPLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -75,7 +75,18 @@ class CoffeeRadarTest(unittest.TestCase):
         self.assertIn("這篇來自 Example", summary)
         self.assertIn("農場/產地", summary)
 
-
+    def test_enrich_items_adds_zh_summary(self):
+        items = [
+            {
+                "title": "New Coffee Sensor",
+                "source": "Test",
+                "categories": ["設備/自動化"],
+                "summary": "A new sensor for coffee roasting.",
+            }
+        ]
+        enriched = _enrich_items(items)
+        self.assertIn("zh_summary", enriched[0])
+        self.assertIn("設備/自動化", enriched[0]["zh_summary"])
 
     def test_crossref_parser(self):
         source = Source(name="Crossref", url="https://api.crossref.org/works", kind="crossref")
