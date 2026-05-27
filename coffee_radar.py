@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import textwrap
 from pathlib import Path
 
 from coffee import (
@@ -13,6 +14,7 @@ from coffee import (
     parse_crossref, parse_europe_pmc, parse_feed, parse_page, parse_reddit,
     write_markdown, write_segment_reports,
 )
+from coffee.util import clean_text, strip_feed_boilerplate
 
 
 def collect(
@@ -68,6 +70,32 @@ def collect(
     return sorted(items, key=sort_key, reverse=True), errors
 
 
+def _fallback_summary_zh(item: dict[str, object]) -> str:
+    title = clean_text(str(item.get("title", "")))
+    source = item.get("source", "未知來源")
+    categories = "、".join(item.get("categories", ["其他咖啡動態"]))
+    summary = clean_text(str(item.get("summary", "")))
+    if summary:
+        summary = strip_feed_boilerplate(summary)
+        summary = textwrap.shorten(summary, width=190, placeholder="...")
+        return f"這篇來自 {source}，主題是「{title}」。目前歸類為{categories}。來源摘要重點：{summary}"
+    return f"這篇來自 {source}，主題是「{title}」。目前歸類為{categories}，值得後續追蹤原文細節。"
+
+
+def _summarize_item_zh(item: dict[str, object]) -> str:
+    return _fallback_summary_zh(item)
+
+
+def _enrich_items(items: list[dict[str, object]]) -> list[dict[str, object]]:
+    enriched: list[dict[str, object]] = []
+    for item in items:
+        next_item = dict(item)
+        if not next_item.get("zh_summary"):
+            next_item["zh_summary"] = _summarize_item_zh(next_item)
+        enriched.append(next_item)
+    return enriched
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Collect coffee industry signals from RSS feeds and public pages."
@@ -86,6 +114,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Directory for farm/processing/climate-tech/equipment reports.",
     )
     parser.add_argument("--no-segments", action="store_true", help="Do not write segment reports.")
+    parser.add_argument(
+        "--enrich", action=argparse.BooleanOptionalAction, default=True,
+        help="Add zh_summary to JSONL output (default: on).",
+    )
     return parser
 
 
@@ -95,7 +127,10 @@ def main(argv: list[str] | None = None) -> int:
     sources = load_sources(source_path)
     items, errors = collect(sources, days=args.days, minimum_score=args.min_score)
     write_markdown(items, errors, Path(args.out), limit=args.limit)
-    write_jsonl([item_to_dict(i) for i in items], Path(args.jsonl))
+    jsonl_items = [item_to_dict(i) for i in items]
+    if args.enrich:
+        jsonl_items = _enrich_items(jsonl_items)
+    write_jsonl(jsonl_items, Path(args.jsonl))
     if not args.no_segments:
         write_segment_reports(items, Path(args.segment_dir), limit=args.limit)
 

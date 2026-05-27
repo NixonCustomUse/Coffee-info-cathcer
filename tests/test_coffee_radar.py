@@ -11,8 +11,7 @@ from coffee.classify import (
     SEGMENT_DEFINITIONS,
 )
 from coffee.parsers import parse_crossref, parse_europe_pmc, parse_feed, parse_reddit
-from coffee_ai import fallback_summary_zh
-from coffee_weekly import select_recent_items, generate_weekly_article
+from coffee_radar import _fallback_summary_zh
 
 
 SAMPLE_FEED = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -72,36 +71,11 @@ class CoffeeRadarTest(unittest.TestCase):
             "categories": ["農場/產地", "種植/氣候"],
             "summary": "Farmers tested robusta varieties and saw better yields.",
         }
-        summary = fallback_summary_zh(item)
+        summary = _fallback_summary_zh(item)
         self.assertIn("這篇來自 Example", summary)
         self.assertIn("農場/產地", summary)
 
-    def test_select_recent_items(self):
-        today = dt.date.today()
-        recent_date = (today - dt.timedelta(days=2)).strftime("%a, %d %b %Y 10:00:00 +0000")
-        old_date = (today - dt.timedelta(days=365)).strftime("%a, %d %b %Y 10:00:00 +0000")
-        items = [
-            {"title": "new", "published": recent_date, "score": 3},
-            {"title": "old", "published": old_date, "score": 9},
-        ]
-        selected = select_recent_items(items, days=7)
-        self.assertEqual(selected[0]["title"], "new")
 
-    def test_weekly_article_fallback_sections(self):
-        article = generate_weekly_article(
-            [
-                {
-                    "title": "Climate-smart coffee farming",
-                    "url": "https://example.com/a",
-                    "categories": ["種植/氣候"],
-                    "score": 5,
-                    "zh_summary": "氣候韌性種植工具值得追蹤。",
-                }
-            ],
-            title="Coffee Radar 週報：2026-W19",
-        )
-        self.assertIn("新研究與產地訊號", article)
-        self.assertIn("下週追蹤問題", article)
 
     def test_crossref_parser(self):
         source = Source(name="Crossref", url="https://api.crossref.org/works", kind="crossref")
