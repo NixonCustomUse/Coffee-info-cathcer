@@ -1,45 +1,32 @@
 # 處理法雷達
 
-產生時間：2026-05-10 00:25
-收錄項目：5 / 5
+產生時間：2026-05-27 21:29
+收錄項目：3 / 10
 
 水洗、日曬、蜜處理、發酵、乾燥與後製技術。
 
 ## 重點項目
 
-### 1. [Evaluation of surface roughness, microhardness, and color change of 3D-printed resins post-polymerized with glycerin gel.](https://doi.org/10.1186/s12903-026-08497-y)
+### 1. [Datura – Finca El Injerto SL-28]()
 
-- 來源：Europe PMC Coffee Research
-- 日期：2026-05-01
-- 分類：處理法/後製、烘焙/萃取技術
-- 命中線索：processing、water
-- 摘要：The aim of this study was to investigate the effects of post-polymerization protocols with and without glycerin on surface roughness, microhardness, and color change of permanent restorative resins fabricated using stereolithography (SLA) and digital light...
+- 來源：r/pourover
+- 日期：2026-05-27T10:25:43+00:00
+- 分類：農場/產地、種植/氣候、處理法/後製、烘焙/萃取技術、市場/價格
+- 命中線索：brew、brewing、extraction、finca、origin、price、roast、variety
+- 摘要：Coffee Details Roaster: Datura (Paris, France 🇫🇷) Coffee: Finca El Injerto Origin: Guatemala – Huehuetenango Process: Washed Variety: SL-28 Altitude: 1500–1800 m Flavor Notes: Black currant, cranberry, hibiscus, blood orange Score: Not specified Bag Size:...
 
-### 2. [Food-Grade Microbial Fermentation of Coffee Bean: From Improvement of Quality, Health Benefits, and Safety Factor to Its Sustainable Applications.](https://doi.org/10.1111/1541-4337.70459)
+### 2. [How to Design the Perfect Home Coffee Station](https://www.mahlkoenig.us/blogs/news/how-to-design-the-perfect-home-coffee-station)
 
-- 來源：Europe PMC Coffee Research
-- 日期：2026-05-01
-- 分類：處理法/後製
-- 命中線索：fermentation
-- 摘要：The coffee industry is under growing pressure to implement sustainable practices while enhancing product value. Food-grade microbial fermentation (FMF) offers a viable pathway for valorize coffee and its by-products, thereby supporting the sustainable...
+- 來源：Mahlkonig USA News
+- 日期：2026-05-14T15:31:32-07:00
+- 分類：處理法/後製、烘焙/萃取技術、設備/自動化
+- 命中線索：brew、brewing、espresso、extraction、natural、technology
+- 摘要：Now more than ever, it’s important to take joy in the little things. With purse strings tightening, working from home on the rise, and life just never slowing down, a high-quality, beautifully presented cup of coffee can feel like a real treat. So if your...
 
-### 3. [Primary Processing](https://ugandacoffee.go.ug/primary-processing)
+### 3. [Dale Harris Welcomed as New Brand Ambassador](https://www.mahlkoenig.us/blogs/news/dale-harris-welcomed-as-new-brand-ambassador)
 
-- 來源：Uganda Coffee Development Authority News
-- 日期：未標示
-- 分類：處理法/後製
-- 命中線索：processing
-
-### 4. [Secondary Processing](https://ugandacoffee.go.ug/secondary-processing)
-
-- 來源：Uganda Coffee Development Authority News
-- 日期：未標示
-- 分類：處理法/後製
-- 命中線索：processing
-
-### 5. [Tertiary Processing](https://ugandacoffee.go.ug/tertiary-processing)
-
-- 來源：Uganda Coffee Development Authority News
-- 日期：未標示
-- 分類：處理法/後製
-- 命中線索：processing
+- 來源：Mahlkonig USA News
+- 日期：2026-03-24T14:30:00-07:00
+- 分類：種植/氣候、處理法/後製、烘焙/萃取技術、市場/價格
+- 命中線索：grinder、international trade、natural、sustainability
+- 摘要：Dale is a highly respected coffee expert and the World Barista Champion of 2017. Over the years, he has built a reputation for his dedication to coffee sustainability, barista training, and education within the Specialty Coffee Association. As the owner of...

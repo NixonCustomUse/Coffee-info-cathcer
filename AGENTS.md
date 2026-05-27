@@ -6,46 +6,33 @@
 sources.json → coffee_radar.py → data/items.jsonl
                                      ↓
                                coffee_ai.py → data/items.enriched.jsonl
-                                                  ↓
-                                            coffee_notion_sync.py → Notion
-                                                  ↓  (Monday only)
-                                            coffee_weekly.py → reports/weekly/
+                                                 ↓
+                                           coffee_telegram.py → Telegram
+                                           coffee_weekly.py   → reports/weekly/
+                                           coffee_email.py    → SMTP
+                                           generate_html.py   → reports/report.html
 ```
 
-## Package structure (after restructure)
-
-```
-coffee/                  # Package, 6 submodules
-  util.py                # clean_text, parse_date, normalize_url, fetch_*, JSONL I/O, strip_feed_boilerplate
-  sources.py             # Source dataclass + load_sources()
-  parsers.py             # parse_feed/page/crossref/europe_pmc + LinkExtractor
-  classify.py            # Item dataclass, CATEGORY_KEYWORDS, classify(), scoring, segment defs
-  report.py              # Markdown report generation
-  __init__.py            # Re-exports
-coffee_radar.py          # Thinner: collect() + main() + CLI only
-coffee_ai.py             # Deterministic Chinese summaries only (no LLM)
-coffee_weekly.py         # Weekly article generation (fallback only)
-coffee_notion_sync.py    # Notion sync with SQLite dedup
-generate_html.py         # HTML dashboard from JSONL
-```
-
-## Pipeline (run order matters)
+## Pipeline
 
 ```bash
 ./run_daily_sync.sh
 # 1. coffee_radar.py --days 45 --limit 30 --min-score 2  → data/items.jsonl
 # 2. coffee_ai.py --input data/items.jsonl               → data/items.enriched.jsonl
-# 3. coffee_notion_sync.py --items data/items.enriched.jsonl --limit 30
+# 3. coffee_telegram.py --input data/items.enriched.jsonl --limit 10
 ```
-
-Weekly report auto-generates on Monday (`$(date +%u)` = 1). Manual: `python3 coffee_weekly.py --input data/items.enriched.jsonl`
 
 ## Key env vars
 
 | Var | Notes |
 |-----|-------|
-| `NOTION_TOKEN` | Required for Notion sync. Use `--skip-notion-if-unconfigured` to pass. |
-| `NOTION_ARTICLES_DATABASE_ID` | Env var overrides `notion_config.json` |
+| `TELEGRAM_BOT_TOKEN` | Required for Telegram |
+| `TELEGRAM_CHAT_ID` | Required for Telegram |
+| `SMTP_USER` / `SMTP_PASS` / `EMAIL_TO` | Required for email |
+| `SMTP_HOST` | Default `smtp.gmail.com` |
+| `SMTP_PORT` | Default `587` |
+| `EMAIL_FROM` | Defaults to `SMTP_USER` |
+| `OPENROUTER_API_KEY` / `OPENAI_API_KEY` | Documented but unused — coffee_ai.py is deterministic only |
 
 ## Focused commands
 
@@ -53,30 +40,56 @@ Weekly report auto-generates on Monday (`$(date +%u)` = 1). Manual: `python3 cof
 # Collect only
 python3 coffee_radar.py --days 30 --limit 20 --min-score 3
 
-# Enrich only
+# Enrich only (deterministic fallback, no API calls)
 python3 coffee_ai.py --input data/items.jsonl
 
-# Notion dry run
-python3 coffee_notion_sync.py --items data/items.enriched.jsonl --dry-run
+# Telegram dry run (daily report)
+python3 coffee_telegram.py --dry-run
+
+# Telegram dry run (weekly digest)
+python3 coffee_telegram.py --digest --dry-run
+
+# Listen for /report and /digest commands
+python3 coffee_telegram.py --listen
+
+# Retry until sent (loop every hour)
+python3 coffee_telegram.py --loop
+
+# Weekly article
+python3 coffee_weekly.py --input data/items.enriched.jsonl
+
+# Email dry run
+python3 coffee_email.py --dry-run
+
+# HTML dashboard
+python3 generate_html.py --input data/items.enriched.jsonl --output reports/report.html
 
 # Run all tests
 python3 -m unittest discover -s tests
-
-# Single test
 python3 -m unittest tests.test_coffee_radar.CoffeeRadarTest.test_parse_feed_and_classify
-
-# HTML report
-python3 generate_html.py --input data/items.enriched.jsonl --output reports/report.html
+python3 -m unittest tests.test_sources
 ```
 
 ## Key conventions
 
 - **Zero dependencies** — pure Python stdlib only. No `pip install`.
 - **Chinese output** — traditional characters (zh-TW) throughout.
-- **Source kinds**: `feed` (RSS/Atom), `page` (HTML link extraction), `crossref`, `europe_pmc`.
+- **Source kinds**: `feed` (RSS/Atom), `page` (HTML link extraction), `reddit` (Atom feed), `crossref`, `europe_pmc`.
 - **Academic filtering** — crossref/europe_pmc sources filtered by `COFFEE_SIGNAL_TERMS` + `UNRELATED_RESEARCH_TERMS`.
 - **URL dedup** via `normalize_url()` (scheme+netloc+path, trailing slash stripped).
-- **Notion sync dedup** — local SQLite (`data/sync_state.sqlite`) prevents re-importing URLs.
-- **Segment reports** — auto-generated in `reports/segments/` unless `--no-segments`.
-- **Category keywords** in `CATEGORY_KEYWORDS` dict — modify to adjust classification.
-- **Notion API version** pinned to `2022-06-28` in `config.py`.
+- **Category keywords** in `CATEGORY_KEYWORDS` dict in `coffee/classify.py`.
+- **Segment reports** auto-generated in `reports/segments/` (farm, processing, climate-tech, equipment).
+- **Item data model** (JSONL): `source`, `title`, `url`, `published`, `summary`, `categories`, `matched_terms`, `score`. After enrichment: `zh_summary`.
+- **State tracking**: `data/.telegram_state` prevents duplicate Telegram sends in one day.
+- **coffee_radar.py exit codes**: 0 if items collected, 2 if none found.
+- **CLI defaults**: most scripts run with sensible defaults — check argparse in each file.
+
+## macOS scheduling
+
+`com.coffee-radar.daily-sync.plist` runs `run_daily_sync.sh` daily at 08:00 via launchd.
+Logs to `logs/daily-sync.log` and `logs/daily-sync.err`.
+**Contains plaintext Telegram tokens — do not commit.**
+
+## Cloudflare Pages
+
+`wrangler.toml` deploys `public/` as `coffee-info-catcher`. Static frontend ("The Brew") renders embedded signal data.

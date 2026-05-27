@@ -7,6 +7,7 @@ import argparse
 import sys
 import textwrap
 from pathlib import Path
+from typing import Any
 
 from coffee import (
     Source, Item, load_sources, classify, is_recent, is_relevant_item,
@@ -70,7 +71,7 @@ def collect(
     return sorted(items, key=sort_key, reverse=True), errors
 
 
-def _fallback_summary_zh(item: dict[str, object]) -> str:
+def _fallback_summary_zh(item: dict[str, Any]) -> str:
     title = clean_text(str(item.get("title", "")))
     source = item.get("source", "未知來源")
     categories = "、".join(item.get("categories", ["其他咖啡動態"]))
@@ -82,12 +83,12 @@ def _fallback_summary_zh(item: dict[str, object]) -> str:
     return f"這篇來自 {source}，主題是「{title}」。目前歸類為{categories}，值得後續追蹤原文細節。"
 
 
-def _summarize_item_zh(item: dict[str, object]) -> str:
+def _summarize_item_zh(item: dict[str, Any]) -> str:
     return _fallback_summary_zh(item)
 
 
-def _enrich_items(items: list[dict[str, object]]) -> list[dict[str, object]]:
-    enriched: list[dict[str, object]] = []
+def _enrich_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
     for item in items:
         next_item = dict(item)
         if not next_item.get("zh_summary"):
