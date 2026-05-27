@@ -1,4 +1,0 @@
-name = "coffee-info-catcher"
-assets = { directory = "./public", not_found_handling = "single-page-application" }
-compatibility_date = "2026-05-10"
-account_id = "81a82d464dc4d0ffee579345e811e119"
