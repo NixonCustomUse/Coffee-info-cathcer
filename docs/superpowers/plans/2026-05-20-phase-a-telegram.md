@@ -324,8 +324,7 @@ Expected: 13/13 pass
 Run:
 ```bash
 cd /Users/nx/Documents/Coffee-info-cathcer
-TELEGRAM_BOT_TOKEN="8889203693:AAGNtYnLXbP4sN1gQCymIsnFwF1O-_slfqk" \
-TELEGRAM_CHAT_ID="5384646857" \
+TELEGRAM_BOT_TOKEN="..." TELEGRAM_CHAT_ID="..." \
 python3 coffee_telegram.py --dry-run --digest
 ```
 Expected: properly formatted digest output. Then send it live:
