@@ -7,6 +7,7 @@ sources.json → coffee_radar.py → data/items.jsonl (incl. zh_summary)
                                     ↓
                               reports/latest.md
                               reports/segments/*.md
+                              coffee_telegram.py → Telegram
 ```
 
 ## Pipeline
@@ -17,6 +18,7 @@ sources.json → coffee_radar.py → data/items.jsonl (incl. zh_summary)
 # 1. Collects from all sources → data/items.jsonl
 # 2. Enriches with zh_summary (deterministic, no API calls)
 # 3. Writes reports/latest.md + reports/segments/*.md
+# 4. Sends highlights via Telegram
 ```
 
 ## Key env vars
@@ -24,6 +26,8 @@ sources.json → coffee_radar.py → data/items.jsonl (incl. zh_summary)
 | Var | Notes |
 |-----|-------|
 | `OPENROUTER_API_KEY` / `OPENAI_API_KEY` | Not used — enrichment is deterministic only |
+| `TELEGRAM_BOT_TOKEN` | Required for Telegram |
+| `TELEGRAM_CHAT_ID` | Required for Telegram |
 
 ## Focused commands
 
